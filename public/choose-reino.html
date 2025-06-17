@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Elige tu Reino</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #3a3a5c);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: #2b2b40;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #000;
+            text-align: center;
+            width: 400px;
+            max-width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px #000;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .reino-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .reino-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .arkangel { background-color: #d63031; }
+        .salazar  { background-color: #00b894; }
+        .albion   { background-color: #fdcb6e; color: #333; }
+        .helenia  { background-color: #6c5ce7; }
+
+        .info-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            border: 1px solid #fff;
+            background: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .info-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .info-panel {
+            display: none;
+            background: #1c1c2b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .info-panel img {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive para móvil */
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px;
+                width: 95%;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .reino-btn {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .info-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elige tu Reino</h1>
+        <button class="reino-btn arkangel" onclick="elegirReino('Arkangel')">Arkangel</button>
+        <button class="reino-btn salazar"  onclick="elegirReino('Salazar')">Salazar</button>
+        <button class="reino-btn albion"   onclick="elegirReino('Albion')">Albion</button>
+        <button class="reino-btn helenia"  onclick="elegirReino('Helenia')">Helenia</button>
+
+        <button class="info-btn" onclick="toggleInfo()">Ver Información de los Reinos</button>
+
+        <div class="info-panel" id="infoPanel">
+            <h3>Arkangel (Rojo)</h3>
+            <p>Nación guerrera y orgullosa, famosa por sus caballeros de élite y estrategias agresivas.</p>
+            <img src="arkangel.jpg" alt="Arkangel">
+
+            <h3>Salazar (Verde)</h3>
+            <p>Reino de los bosques y la naturaleza, hogar de arqueros legendarios y criaturas místicas.</p>
+            <img src="salazar.jpg" alt="Salazar">
+
+            <h3>Albion (Naranja)</h3>
+            <p>Imperio comerciante y alquímico, sus inventos y artefactos desequilibran cualquier batalla.</p>
+            <img src="albion.jpg" alt="Albion">
+
+            <h3>Helenia (Morado)</h3>
+            <p>Reino de la magia y la sabiduría arcana. Sus magos controlan el tiempo y el espacio.</p>
+            <img src="helenia.jpg" alt="Helenia">
+        </div>
+    </div>
+
+    <script>
+        function elegirReino(reino) {
+            fetch('/set-reino', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reino })
+            }).then(() => window.location.href = '/');
+        }
+
+        function toggleInfo() {
+            const panel = document.getElementById('infoPanel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa Interactivo - Reinos</title>
+    <style>
+        svg { width: 80%; height: auto; border: 2px solid #333; display: block; margin: 0 auto; }
+        .region { cursor: pointer; stroke: #000; stroke-width: 2; }
+        .tooltip {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #333;
+            padding: 5px;
+            display: none;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Mapa Interactivo - Reinos</h1>
+
+    <!-- SVG embebido directamente con coordenadas estimadas -->
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <path id="Salazar" class="region" d="M200,20 L380,60 L350,180 L250,170 Z" fill="#6aa84f" />
+        <path id="Arkangel" class="region" d="M50,80 L190,30 L240,160 L100,200 Z" fill="#f44336" />
+        <path id="Albion" class="region" d="M30,220 L180,220 L180,370 L30,370 Z" fill="#ff9800" />
+        <path id="Helenia" class="region" d="M220,230 L370,230 L370,370 L220,370 Z" fill="#9c27b0" />
+    </svg>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        const tooltip = document.getElementById('tooltip');
+        const reinos = {
+            Arkangel: { nombre: 'Arkangel', tropas: 120 },
+            Salazar: { nombre: 'Salazar', tropas: 95 },
+            Albion: { nombre: 'Albion', tropas: 110 },
+            Helenia: { nombre: 'Helenia', tropas: 80 }
+        };
+
+        document.querySelectorAll('.region').forEach(region => {
+            region.addEventListener('mouseover', (e) => {
+                const info = reinos[e.target.id];
+                tooltip.innerHTML = `<strong>${info.nombre}</strong><br>Tropas: ${info.tropas}`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = e.pageX + 'px';
+                tooltip.style.top = e.pageY + 'px';
+            });
+
+            region.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 'px';
+                tooltip.style.top = e.pageY + 'px';
+            });
+
+            region.addEventListener('mouseout', () => {
+                tooltip.style.display = 'none';
+            });
+
+            region.addEventListener('click', (e) => {
+                const info = reinos[e.target.id];
+                alert(`Has seleccionado: ${info.nombre}\nTropas: ${info.tropas}`);
+            });
+        });
+    </script>
+</body>
+</html>

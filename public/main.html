@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyKingdom Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .fade-enter {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .fade-enter-active {
+      transition: all 0.4s ease-in-out;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 text-white">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 p-5 flex flex-col space-y-6">
+      <h2 class="text-2xl font-bold">MyKingdom</h2>
+      <nav id="sidebar-menu" class="flex flex-col space-y-3">
+        <a href="#" onclick="loadSection('dashboard')" class="hover:bg-gray-700 p-2 rounded" id="menu-dashboard">Dashboard</a>
+        <a href="#" onclick="loadSection('tropas')" class="hover:bg-gray-700 p-2 rounded" id="menu-tropas">Tropas</a>
+        <a href="#" onclick="loadSection('recursos')" class="hover:bg-gray-700 p-2 rounded" id="menu-recursos">Recursos</a>
+        <a href="#" onclick="loadSection('edificios')" class="hover:bg-gray-700 p-2 rounded" id="menu-edificios">Edificios</a>
+        <a href="#" onclick="loadSection('tienda')" class="hover:bg-gray-700 p-2 rounded" id="menu-tienda">Tienda</a>
+        <a href="#" onclick="loadSection('chat')" class="hover:bg-gray-700 p-2 rounded" id="menu-chat">Chat</a>
+        <a href="#" onclick="loadSection('noticias')" class="hover:bg-gray-700 p-2 rounded" id="menu-noticias">Noticias</a>
+        <a href="#" onclick="loadSection('estadisticas')" class="hover:bg-gray-700 p-2 rounded" id="menu-estadisticas">Estadísticas</a>
+        <!-- <a href="#" onclick="loadSection('nueva')" class="hover:bg-gray-700 p-2 rounded" id="menu-nueva">Nueva Sección</a> -->
+
+        <button id="lang-btn" onclick="toggleLanguage()" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded">Cambiar Idioma</button>
+        <a id="logout-btn" href="#" onclick="logout()" class="hover:bg-red-600 bg-red-700 p-2 rounded mt-auto">Cerrar sesión</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 space-y-6">
+      <div id="main-content" class="fade-enter">
+        <!-- Contenido dinámico -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentLang = 'es';
+
+    const translations = {
+      es: {
+        dashboard: 'Tablero',
+        tropas: 'Tropas',
+        recursos: 'Recursos',
+        edificios: 'Edificios',
+        tienda: 'Tienda',
+        chat: 'Chat',
+        noticias: 'Noticias',
+        estadisticas: 'Estadísticas',
+        logout: 'Cerrar sesión',
+        changeLang: 'Cambiar Idioma'
+        //nueva: 'Nueva Sección',
+      },
+      en: {
+        dashboard: 'Dashboard',
+        tropas: 'Troops',
+        recursos: 'Resources',
+        edificios: 'Buildings',
+        tienda: 'Shop',
+        chat: 'Chat',
+        noticias: 'News',
+        estadisticas: 'Statistics',
+        logout: 'Log out',
+        changeLang: 'Change Language'
+        //nueva: 'New Section',
+      }
+    };
+
+    function updateSidebarText() {
+      const t = translations[currentLang];
+      document.getElementById('menu-dashboard').textContent = t.dashboard;
+      document.getElementById('menu-tropas').textContent = t.tropas;
+      document.getElementById('menu-recursos').textContent = t.recursos;
+      document.getElementById('menu-edificios').textContent = t.edificios;
+      document.getElementById('menu-tienda').textContent = t.tienda;
+      document.getElementById('menu-chat').textContent = t.chat;
+      document.getElementById('menu-noticias').textContent = t.noticias;
+      document.getElementById('menu-estadisticas').textContent = t.estadisticas;
+      document.getElementById('logout-btn').textContent = t.logout;
+      document.getElementById('lang-btn').textContent = t.changeLang;
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'es' ? 'en' : 'es';
+      updateSidebarText();
+      loadSection('dashboard');
+    }
+
+    function animateTransition(element) {
+      element.classList.remove('fade-enter');
+      void element.offsetWidth;
+      element.classList.add('fade-enter');
+      element.classList.add('fade-enter-active');
+      setTimeout(() => {
+        element.classList.remove('fade-enter');
+        element.classList.remove('fade-enter-active');
+      }, 400);
+    }
+
+    function logout() {
+      alert(currentLang === 'es' ? 'Cerrando sesión...' : 'Logging out...');
+    }
+
+    function crearTarjetaTropa(nombre, cantidad) {
+      return `
+        <div class="bg-gray-800 p-5 rounded-lg shadow flex flex-col justify-between space-y-4 transition duration-300 hover:scale-105">
+          <div>
+            <h2 class="text-xl font-bold">${nombre}</h2>
+            <p class="text-gray-400">Cantidad: <span class="font-semibold">${cantidad}</span></p>
+          </div>
+          <div class="flex gap-2">
+            <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full transition">Reclutar</button>
+            <button class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded w-full transition">Mejorar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadSection(section) {
+      const content = document.getElementById('main-content');
+      animateTransition(content);
+      let html = '';
+      const t = translations[currentLang];
+
+      switch (section) {
+        case 'dashboard':
+          html = `<h1 class="text-3xl font-semibold mb-6">${t.dashboard}</h1><p>${currentLang === 'es' ? 'Bienvenido al tablero principal.' : 'Welcome to your main dashboard.'}</p>`;
+          break;
+
+        case 'tropas':
+          console.log("Sección tropas cargando...");
+          const tropas = currentLang === 'es'
+            ? [['Arqueros', 30], ['Espadachines', 20], ['Magos', 10]]
+            : [['Archers', 30], ['Swordsmen', 20], ['Mages', 10]];
+          html = `
+            <h1 class="text-3xl font-semibold mb-6">${t.tropas}</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${tropas.map(t => crearTarjetaTropa(t[0], t[1])).join('')}
+            </div>
+          `;
+          break;
+
+        case 'recursos':
+        case 'edificios':
+        case 'tienda':
+        case 'chat':
+        case 'noticias':
+        case 'estadisticas':
+          html = `<h1 class="text-3xl font-semibold mb-6">${t[section]}</h1><p>${t[section]} ${currentLang === 'es' ? 'en desarrollo...' : 'under development...'}</p>`;
+          break;
+        /* case 'nueva':
+            html = `
+                <h1 class="text-3xl font-semibold mb-6">${t.nueva}</h1>
+                <p>${currentLang === 'es' ? 'Contenido de la nueva sección.' : 'Content of the new section.'}</p>
+            `;
+            break; */
+        default:
+          html = `<p>Sección no encontrada.</p>`;
+      }
+
+      content.innerHTML = html;
+    }
+
+    window.onload = () => {
+      updateSidebarText();
+      loadSection('dashboard');
+    };
+  </script>
+</body>
+
+</html>
