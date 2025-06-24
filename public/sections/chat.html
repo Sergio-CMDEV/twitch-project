@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat y Stream de DearBird</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #181c23; color: #fff; }
+    .stream-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin-top: 0 !important; padding-top: 0 !important; }
+    @media (min-width: 1024px) {
+      .stream-container { flex-direction: row; gap: 2rem; }
+    }
+    .twitch-embed, .twitch-chat {
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      background: #23272f;
+    }
+    .w-full.flex.justify-center.mt-8 {
+      margin-top: 1.5rem !important;
+    }
+    .twitch-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .twitch-title .morado {
+      color: #a259f7;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .twitch-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #bdbdbd;
+      margin-bottom: 1.5rem;
+    }
+    .section-separator {
+      width: 100%;
+      border-bottom: 2px solid #333;
+      margin: 2rem 0 1.5rem 0;
+    }
+    .clips-title {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #a259f7;
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+    }
+    .clips-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .clip-iframe {
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      background: #23272f;
+      border: none;
+      width: 350px;
+      height: 200px;
+    }
+    .clips-carousel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .carousel-arrow {
+      font-size: 2.2rem;
+      color: #a259f7;
+      background: none;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .carousel-arrow:disabled {
+      color: #444;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  <!-- IMPORTANTE: Cambia 'parent=localhost' por el dominio real donde se aloje tu web, por ejemplo 'parent=midominio.com' -->
+  <div class="stream-container flex flex-col lg:flex-row items-center justify-center min-h-screen gap-8" style="padding-top:0;margin-top:0;">
+    <!-- Reemplaza 'tu_canal' por tu nombre de usuario de Twitch -->
+    <div class="twitch-embed mb-6" style="width: 100%; max-width: 700px; height: 400px; background: #23272f; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.3);">
+      <iframe
+        src="https://player.twitch.tv/?channel=DearBird&parent=localhost"
+        frameborder="0"
+        allowfullscreen="true"
+        scrolling="no"
+        height="100%"
+        width="100%">
+      </iframe>
+    </div>
+    <div class="twitch-chat" style="width: 350px; height: 400px; background: #23272f; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.3);">
+      <iframe
+        src="https://www.twitch.tv/embed/DearBird/chat?parent=localhost"
+        frameborder="0"
+        scrolling="no"
+        height="100%"
+        width="100%">
+      </iframe>
+    </div>
+  </div>
+  <div id="twitch-status"></div>
+  <div class="section-separator"></div>
+  <div class="clips-title">Calendario de emisiones</div>
+  <div class="w-full flex justify-center mt-4">
+    <iframe
+      src="https://www.twitch.tv/DearBird/schedule?seriesID=all&segmentID=all&view=calendar&parent=localhost"
+      style="width: 100%; max-width: 1100px; height: 600px; background: #23272f; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.3); border: none;"
+      frameborder="0"
+      scrolling="no"
+      allowfullscreen>
+    </iframe>
+  </div>
+  <div class="section-separator"></div>
+  <div class="clips-title">Clips destacados del canal</div>
+  <div class="clips-carousel" id="clips-carousel">
+    <button class="carousel-arrow" id="arrow-left">&#8592;</button>
+    <div id="clips-container" style="display: flex; gap: 1.5rem;"></div>
+    <button class="carousel-arrow" id="arrow-right">&#8594;</button>
+  </div>
+  <script>
+    // --- Estado de stream y título dinámico ---
+    async function getTwitchStatus() {
+      const channel = 'DearBird';
+      const statusDiv = document.getElementById('twitch-status');
+      let isLive = false;
+      let streamTitle = '';
+      let gameName = '';
+      let streamUrl = `https://www.twitch.tv/${channel}`;
+      let lastStreamTitle = '';
+      let lastGameName = '';
+      let broadcasterId = '';
+      try {
+        const res = await fetch(`/api/twitch_status?channel=${channel}`);
+        const data = await res.json();
+        if (data.error || (!data.isLive && !data.lastStreamTitle)) {
+          statusDiv.innerHTML = `<div class='twitch-title'><a href='${streamUrl}' target='_blank' class='morado'>DearBird</a> (sin datos de Twitch)</div><div class='twitch-subtitle'>No se pudo obtener información del stream.</div>`;
+          return '';
+        }
+        isLive = data.isLive;
+        streamTitle = data.streamTitle;
+        gameName = data.gameName;
+        lastStreamTitle = data.lastStreamTitle;
+        lastGameName = data.lastGameName;
+        broadcasterId = data.broadcasterId;
+      } catch (e) {
+        statusDiv.innerHTML = `<div class='twitch-title'><a href='${streamUrl}' target='_blank' class='morado'>DearBird</a> (error de conexión con Twitch)</div><div class='twitch-subtitle'>No se pudo obtener información del stream.</div>`;
+        return '';
+      }
+      if (isLive) {
+        statusDiv.innerHTML = `<div class='twitch-title'><a href='${streamUrl}' target='_blank' class='morado'>DearBird</a> está en stream</div><div class='twitch-subtitle'>"${streamTitle || 'Sin título'}" haciendo ${gameName || 'Sin categoría'}</div>`;
+      } else {
+        statusDiv.innerHTML = `<div class='twitch-title'><a href='${streamUrl}' target='_blank' class='morado'>DearBird</a> está offline</div><div class='twitch-subtitle'>"${lastStreamTitle || 'Sin título'}"${lastGameName ? ' en ' + lastGameName : ''}</div>`;
+      }
+      return broadcasterId;
+    }
+    // --- Clips destacados ---
+    let allClips = [];
+    let clipIndex = 0;
+    async function fetchClips() {
+      try {
+        const res = await fetch(`/api/twitch_clips?broadcaster_id=DearBird`);
+        const data = await res.json();
+        if (data.clips && data.clips.length) {
+          allClips = data.clips.sort(() => 0.5 - Math.random());
+        } else {
+          allClips = [];
+        }
+      } catch {
+        allClips = [];
+      }
+    }
+    function renderClips() {
+      const clipsDiv = document.getElementById('clips-container');
+      if (!allClips.length) {
+        clipsDiv.innerHTML = '<div class="text-gray-400">No hay clips disponibles.</div>';
+        return;
+      }
+      // Muestra 5 clips a partir de clipIndex
+      const visible = allClips.slice(clipIndex, clipIndex + 5);
+      clipsDiv.innerHTML = visible.map(clip =>
+        `<iframe class='clip-iframe' src='${clip.embed_url}&parent=localhost&muted=true' allowfullscreen></iframe>`
+      ).join('');
+      // Flechas
+      document.getElementById('arrow-left').disabled = clipIndex === 0;
+      document.getElementById('arrow-right').disabled = (clipIndex + 5) >= allClips.length;
+    }
+    document.addEventListener('DOMContentLoaded', async () => {
+      const broadcasterId = await getTwitchStatus();
+      await fetchClips();
+      renderClips();
+      document.getElementById('arrow-left').onclick = () => {
+        if (clipIndex > 0) {
+          clipIndex -= 1;
+          renderClips();
+        }
+      };
+      document.getElementById('arrow-right').onclick = () => {
+        if ((clipIndex + 5) < allClips.length) {
+          clipIndex += 1;
+          renderClips();
+        }
+      };
+    });
+  </script>
+  <!-- Si ves error de conexión de Twitch, asegúrate de poner el dominio correcto en 'parent' en todos los iframes. -->
+</body>
+</html>

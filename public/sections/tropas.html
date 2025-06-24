@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tropas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    .fade-in.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tropa-card {
+      transition: all 0.3s cubic-bezier(.4,0,.2,1);
+      cursor: pointer;
+      min-height: 240px;
+      max-width: 200px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 240px;
+      box-sizing: border-box;
+      background: #23272f;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      padding: 1.2rem 0.7rem;
+    }
+    .tropa-card.selected {
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transform: scale(1.05) translateY(-6px);
+      background: #374151;
+      /* Quitar el borde azul para que el brillo de color siempre se vea */
+      border: none;
+    }
+    .tropa-card.unselected {
+      filter: grayscale(1) brightness(0.7);
+      opacity: 0.6;
+      transform: scale(0.97);
+    }
+    .tropa-card h2 {
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    }
+    .tropa-card img {
+      width: 140px;
+      height: 140px;
+      margin-bottom: 0.3rem;
+      object-fit: contain;
+    }
+    .tropa-card button {
+      font-size: 0.95rem;
+      padding: 0.3rem 1rem;
+      margin-bottom: 0.1rem;
+    }
+    .tropa-card span {
+      text-align: center;
+    }
+    @media (min-width: 1024px) {
+      .tropas-flex {
+        display: flex;
+        gap: 2rem;
+      }
+      .tropas-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.2rem;
+        width: 100%;
+      }
+      .tropa-details {
+        flex: 1;
+        min-width: 320px;
+        max-width: 400px;
+        background: #23272f;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        padding: 2rem 1.5rem;
+        margin-top: 0.5rem;
+        height: fit-content;
+        transition: opacity 0.4s;
+      }
+    }
+    @media (max-width: 1023px) {
+      .tropa-details {
+        display: block;
+        background: #23272f;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        padding: 1.2rem 1rem;
+        margin: 1.2rem auto 0 auto;
+        max-width: 95vw;
+        min-width: 0;
+      }
+    }
+    .tropa-card:hover {
+      transform: translateY(-8px) scale(1.04);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .exclusiva-arkangel {
+      border: 2px solid #dc2626;
+      box-shadow: none !important;
+    }
+    .exclusiva-albion {
+      border: 2px solid #f59e42;
+      box-shadow: none !important;
+    }
+    .exclusiva-helenia {
+      border: 2px solid #a855f7;
+      box-shadow: none !important;
+    }
+    .exclusiva-salazar {
+      border: 2px solid #22c55e;
+      box-shadow: none !important;
+    }
+    .exclusiva-cofre {
+      border: 2px solid #ffd700;
+      box-shadow: none !important;
+    }
+    .exclusiva-basica {
+      border: 1.5px solid #fff;
+      box-shadow: none !important;
+    }
+    /* Elimina cualquier borde o brillo en hover/selected */
+    .tropa-card.selected,
+    .tropa-card:hover,
+    .tropa-card.selected.exclusiva-arkangel,
+    .tropa-card.selected.exclusiva-albion,
+    .tropa-card.selected.exclusiva-helenia,
+    .tropa-card.selected.exclusiva-salazar,
+    .tropa-card.selected.exclusiva-cofre,
+    .tropa-card.selected.exclusiva-basica {
+      box-shadow: none !important;
+      border: none !important;
+    }
+
+    /* Siempre mostrar el borde de color aunque esté bloqueada */
+    .tropa-card.unselected.exclusiva-arkangel {
+      box-shadow: 0 0 0 2px #dc2626, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none;
+    }
+    .tropa-card.unselected.exclusiva-albion {
+      box-shadow: 0 0 0 2px #f59e42, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none;
+    }
+    .tropa-card.unselected.exclusiva-helenia {
+      box-shadow: 0 0 0 2px #a855f7, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none;
+    }
+    .tropa-card.unselected.exclusiva-salazar {
+      box-shadow: 0 0 0 2px #22c55e, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none;
+    }
+    .tropa-card.unselected.exclusiva-cofre {
+      box-shadow: 0 0 8px 2px #ffd700, 0 8px 32px rgba(0,0,0,0.5) !important;
+      filter: drop-shadow(0 0 8px #ffd700);
+      border: none;
+    }
+    .tropa-card.unselected.exclusiva-basica {
+      box-shadow: 0 0 0 1px #fff6, 0 8px 32px rgba(0,0,0,0.15) !important;
+      border: none;
+    }
+    /* Al seleccionar, el brillo se intensifica y NO se ve en gris */
+    .tropa-card.selected.exclusiva-arkangel { box-shadow: 0 0 0 4px #dc2626, 0 8px 32px rgba(0,0,0,0.5) !important; border: none; filter: none; }
+    .tropa-card.selected.exclusiva-albion   { box-shadow: 0 0 0 4px #f59e42, 0 8px 32px rgba(0,0,0,0.5) !important; border: none; filter: none; }
+    .tropa-card.selected.exclusiva-helenia  { box-shadow: 0 0 0 4px #a855f7, 0 8px 32px rgba(0,0,0,0.5) !important; border: none; filter: none; }
+    .tropa-card.selected.exclusiva-salazar  { box-shadow: 0 0 0 4px #22c55e, 0 8px 32px rgba(0,0,0,0.5) !important; border: none; filter: none; }
+    .tropa-card.selected.exclusiva-cofre    { box-shadow: 0 0 16px 4px #ffd700, 0 8px 32px rgba(0,0,0,0.5) !important; filter: drop-shadow(0 0 8px #ffd700); border: none; }
+    .tropa-card.selected.exclusiva-basica   { box-shadow: 0 0 0 2px #fff, 0 8px 32px rgba(0,0,0,0.5) !important; border: none; filter: none; }
+
+    /* El filtro gris SOLO si está bloqueada */
+    .tropa-card.unselected { filter: grayscale(1) brightness(0.7); opacity: 0.6; transform: scale(0.97); }
+    /* Quitar el filtro si está seleccionada y NO bloqueada */
+    .tropa-card.selected:not(.unselected) { filter: none !important; opacity: 1; }
+
+    /* --- BRILLO FUERTE SOLO AL FINAL PARA SOBRESCRIBIR --- */
+    .tropa-card.selected.exclusiva-arkangel,
+    .tropa-card.selected[class*="exclusiva-arkangel"],
+    .tropa-card.selected.exclusiva-arkangel:not(.unselected) {
+      box-shadow: 0 0 0 4px #dc2626, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-albion,
+    .tropa-card.selected[class*="exclusiva-albion"],
+    .tropa-card.selected.exclusiva-albion:not(.unselected) {
+      box-shadow: 0 0 0 4px #f59e42, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-helenia,
+    .tropa-card.selected[class*="exclusiva-helenia"],
+    .tropa-card.selected.exclusiva-helenia:not(.unselected) {
+      box-shadow: 0 0 0 4px #a855f7, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-salazar,
+    .tropa-card.selected[class*="exclusiva-salazar"],
+    .tropa-card.selected.exclusiva-salazar:not(.unselected) {
+      box-shadow: 0 0 0 4px #22c55e, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-cofre,
+    .tropa-card.selected[class*="exclusiva-cofre"],
+    .tropa-card.selected.exclusiva-cofre:not(.unselected) {
+      box-shadow: 0 0 16px 4px #ffd700, 0 8px 32px rgba(0,0,0,0.5) !important;
+      filter: drop-shadow(0 0 8px #ffd700) !important;
+      border: none !important;
+    }
+    .tropa-card.selected.exclusiva-basica,
+    .tropa-card.selected[class*="exclusiva-basica"],
+    .tropa-card.selected.exclusiva-basica:not(.unselected) {
+      box-shadow: 0 0 0 2px #fff, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    /* --- OPTIMIZACIÓN Y REFUERZO FINAL: BRILLO FUERTE EN CARTAS EXCLUSIVAS SELECCIONADAS --- */
+    /* Elimina duplicados y asegura máxima prioridad solo en el estado seleccionado */
+    .tropa-card.selected.exclusiva-arkangel {
+      box-shadow: 0 0 0 4px #dc2626, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-albion {
+      box-shadow: 0 0 0 4px #f59e42, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-helenia {
+      box-shadow: 0 0 0 4px #a855f7, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-salazar {
+      box-shadow: 0 0 0 4px #22c55e, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+    .tropa-card.selected.exclusiva-cofre {
+      box-shadow: 0 0 16px 4px #ffd700, 0 8px 32px rgba(0,0,0,0.5) !important;
+      filter: drop-shadow(0 0 8px #ffd700) !important;
+      border: none !important;
+    }
+    .tropa-card.selected.exclusiva-basica {
+      box-shadow: 0 0 0 2px #fff, 0 8px 32px rgba(0,0,0,0.5) !important;
+      border: none !important;
+      filter: none !important;
+    }
+
+    /* --- BORDES SÓLIDOS PARA CARTAS EXCLUSIVAS SELECCIONADAS (SIN BRILLO) --- */
+    .tropa-card.selected.exclusiva-arkangel {
+      border: 4px solid #dc2626 !important;
+      box-shadow: none !important;
+    }
+    .tropa-card.selected.exclusiva-albion {
+      border: 4px solid #f59e42 !important;
+      box-shadow: none !important;
+    }
+    .tropa-card.selected.exclusiva-helenia {
+      border: 4px solid #a855f7 !important;
+      box-shadow: none !important;
+    }
+    .tropa-card.selected.exclusiva-salazar {
+      border: 4px solid #22c55e !important;
+      box-shadow: none !important;
+    }
+    .tropa-card.selected.exclusiva-cofre {
+      border: 4px solid #ffd700 !important;
+      box-shadow: none !important;
+    }
+    .tropa-card.selected.exclusiva-basica {
+      border: 3px solid #fff !important;
+      box-shadow: none !important;
+    }
+    /* Elimina cualquier pseudo-elemento de brillo */
+    .tropa-card.selected.exclusiva-arkangel::after,
+    .tropa-card.selected.exclusiva-albion::after,
+    .tropa-card.selected.exclusiva-helenia::after,
+    .tropa-card.selected.exclusiva-salazar::after,
+    .tropa-card.selected.exclusiva-cofre::after,
+    .tropa-card.selected.exclusiva-basica::after {
+      display: none !important;
+    }
+    /* Asegura que .tropa-card tenga position: relative para el ::after */
+    .tropa-card { position: relative; }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen transition-colors duration-500">
+  <!--
+  Estadísticas de unidades romanas (Total War: Rome II)
+
+  Legionarios / Legionaries
+  - Tipo: Infantería cuerpo a cuerpo / Melee Infantry
+  - Tamaño unidad: 160
+  - Costo: 660
+  - Vida: 140
+  - Armadura: 47
+  - Ataque: 35
+  - Defensa: 14
+  - Daño arma: 48
+  - Moral: 80
+  - Velocidad: 60
+  - Descripción ES: La clásica infantería pesada con buena armadura y una moral inquebrantable.
+  - Description EN: The classic heavy infantry with good armor and unbreakable morale.
+
+  Pretorianos / Praetorians
+  - Tipo: Infantería cuerpo a cuerpo / Melee Infantry
+  - Tamaño unidad: 160
+  - Costo: 1280
+  - Vida: 200
+  - Armadura: 65
+  - Ataque: 39
+  - Defensa: 19
+  - Daño arma: 55
+  - Moral: 85
+  - Velocidad: 65
+  - Descripción ES: Soldados de infantería pesada elegidos uno a uno, acostumbrados a todo tipo de combate.
+  - Description EN: Hand-picked heavy infantry soldiers, used to all kinds of combat.
+
+  Triarii
+  - Tipo: Infantería con lanza / Spear Infantry
+  - Tamaño unidad: 160
+  - Costo: 790
+  - Vida: 140
+  - Armadura: 31
+  - Ataque: 29
+  - Defensa: 24
+  - Daño arma: 64
+  - Moral: 95
+  - Velocidad: 65
+  - Descripción ES: La riqueza, la experiencia y la edad convierten a estos curtidos veteranos en una fuerza temible.
+  - Description EN: Wealth, experience, and age make these seasoned veterans a formidable force.
+
+  Gladiador / Gladiator
+  - Tipo: Infantería cuerpo a cuerpo / Melee Infantry
+  - Tamaño unidad: 120
+  - Costo: 600
+  - Vida: 100
+  - Armadura: 67
+  - Ataque: 39
+  - Defensa: 22
+  - Daño arma: 60
+  - Moral: 10
+  - Velocidad: 65
+  - Descripción ES: Infantería pesada muy bien entrenada que no teme a la muerte.
+  - Description EN: Well-trained heavy infantry that does not fear death.
+
+  Arqueros auxiliares / Auxiliary Archers
+  - Tipo: Infantería de proyectiles / Missile Infantry
+  - Tamaño unidad: 120
+  - Costo: 280
+  - Vida: 70
+  - Armadura: 35
+  - Ataque: 125 (arco)
+  - Defensa: 6
+  - Daño arma: 15
+  - Moral: 10
+  - Velocidad: 45
+  - Munición: 24
+  - Descripción ES: Los arqueros pueden acabar con los enemigos de Roma a distancia.
+  - Description EN: Archers can finish off Rome's enemies from a distance.
+  -->
+  <div class="max-w-6xl mx-auto p-6 fade-in show">
+    <h1 class="text-3xl font-bold mb-6">Tropas</h1>
+    <div class="tropas-flex">
+      <div class="tropas-list" id="tropas-list">
+        <!-- Las cartas de tropas se generan por JS -->
+      </div>
+      <div class="tropa-details hidden" id="tropa-details"></div>
+    </div>
+    <div class="mt-8 text-center text-gray-400">
+      <p>Las tropas bloqueadas solo pueden obtenerse mediante cofres o son exclusivas de ciertos reinos.</p>
+    </div>
+  </div>
+  <script>
+    let lang = (localStorage.getItem('lang') || (navigator.language || navigator.userLanguage).startsWith('es') ? 'es' : 'en');
+    const textos = {
+      es: {
+        reclutar: 'Reclutar',
+        mejorar: 'Mejorar',
+        bloqueado: 'Bloqueado',
+        soloCofres: 'Solo cofres',
+        exclusivoArkangel: 'Exclusivo Arkangel',
+        exclusivoSalazar: 'Exclusivo Salazar',
+        tier: 'Tier',
+        legiones: 'Legiones',
+        ataque: 'Ataque',
+        defensa: 'Defensa',
+        vida: 'Vida',
+        velocidad: 'Velocidad',
+        descripcion: 'Descripción',
+        tropasBloqueadas: 'Las tropas bloqueadas solo pueden obtenerse mediante cofres o son exclusivas de ciertos reinos.',
+        costo: 'Costo',
+        armadura: 'Armadura',
+        moral: 'Moral',
+        municion: 'Munición',
+        tamano: 'Tamaño unidad',
+        tipo: 'Tipo',
+        danio: 'Daño arma',
+        alcance: 'Alcance',
+      },
+      en: {
+        reclutar: 'Recruit',
+        mejorar: 'Upgrade',
+        bloqueado: 'Locked',
+        soloCofres: 'Chests only',
+        exclusivoArkangel: 'Arkangel exclusive',
+        exclusivoSalazar: 'Salazar exclusive',
+        tier: 'Tier',
+        legiones: 'Legions',
+        ataque: 'Attack',
+        defensa: 'Defense',
+        vida: 'HP',
+        velocidad: 'Speed',
+        descripcion: 'Description',
+        tropasBloqueadas: 'Locked troops can only be obtained from chests or are exclusive to certain kingdoms.',
+        costo: 'Cost',
+        armadura: 'Armour',
+        moral: 'Morale',
+        municion: 'Ammunition',
+        tamano: 'Unit size',
+        tipo: 'Type',
+        danio: 'Weapon damage',
+        alcance: 'Range',
+      }
+    };
+
+    // Ejemplo de tropas con traducción
+    const tropas = [
+      // Unidades comunes
+      {
+        nombre: 'Caballería Ligera',
+        nombres: { es: 'Caballería Ligera', en: 'Light Cavalry' },
+        tier: 'I',
+        img: '/img/tropas/base/caballeria_ligera.png',
+        stats: { Ataque: 8, Defensa: 6, Vida: 24, Velocidad: 10, Costo: 400, Armadura: 15, Moral: 40, Danio: 20 },
+        descripcion: 'Caballería rápida y versátil.',
+        descripciones: { es: 'Caballería rápida y versátil.', en: 'Fast and versatile cavalry.' },
+        bloqueado: false
+      },
+      {
+        nombre: 'Arquero',
+        nombres: { es: 'Arquero', en: 'Archer' },
+        tier: 'II',
+        img: '/img/tropas/base/arquero.png',
+        stats: { Ataque: 8, Defensa: 4, Vida: 70, Velocidad: 45, Costo: 280, Armadura: 35, Moral: 10, Danio: 15, Municion: 24, Alcance: 125 },
+        descripcion: 'Especialista en ataques a distancia. Puede acabar con los enemigos de Roma a distancia.',
+        descripciones: {
+          es: 'Especialista en ataques a distancia. Puede acabar con los enemigos de Roma a distancia.',
+          en: 'Ranged attack specialist. Can finish off Rome\'s enemies from a distance.'
+        },
+        bloqueado: false
+      },
+      {
+        nombre: 'Infantería',
+        nombres: { es: 'Infantería', en: 'Infantry' },
+        tier: 'III',
+        img: '/img/tropas/base/infanteria.png',
+        stats: { Ataque: 35, Defensa: 14, Vida: 140, Velocidad: 60, Costo: 660, Armadura: 47, Moral: 80, Danio: 48 },
+        descripcion: 'Soldado de infantería estándar. La base de cualquier ejército.',
+        descripciones: {
+          es: 'Soldado de infantería estándar. La base de cualquier ejército.',
+          en: 'Standard infantry soldier. The backbone of any army.'
+        },
+        bloqueado: false
+      },
+      {
+        nombre: 'Piquero',
+        nombres: { es: 'Piquero', en: 'Pikeman' },
+        tier: 'IV',
+        img: '/img/tropas/base/piquero.png',
+        stats: { Ataque: 31, Defensa: 24, Vida: 140, Velocidad: 65, Costo: 790, Armadura: 29, Moral: 95, Danio: 64 },
+        descripcion: 'Efectivo contra caballería. Armado con pica larga.',
+        descripciones: {
+          es: 'Efectivo contra caballería. Armado con pica larga.',
+          en: 'Effective against cavalry. Armed with a long pike.'
+        },
+        bloqueado: false
+      },
+      // Exclusivas Arkangel (Roma)
+      {
+        nombre: 'Legionario',
+        nombres: { es: 'Legionario', en: 'Legionary' },
+        tier: 'V',
+        img: '/img/tropas/arkangel/legionario.png',
+        stats: { Ataque: 35, Defensa: 14, Vida: 140, Velocidad: 60, Costo: 660, Armadura: 47, Moral: 80, Danio: 48 },
+        descripcion: 'Infantería pesada romana, disciplinada y letal. La clásica infantería pesada con buena armadura y una moral inquebrantable.',
+        descripciones: {
+          es: 'Infantería pesada romana, disciplinada y letal. La clásica infantería pesada con buena armadura y una moral inquebrantable.',
+          en: 'Roman heavy infantry, disciplined and lethal. The classic heavy infantry with good armor and unbreakable morale.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Arkangel'
+      },
+      {
+        nombre: 'Pretoriano',
+        nombres: { es: 'Pretoriano', en: 'Praetorian' },
+        tier: 'VI',
+        img: '/img/tropas/arkangel/pretoriano.png',
+        stats: { Ataque: 39, Defensa: 19, Vida: 200, Velocidad: 65, Costo: 1280, Armadura: 65, Moral: 85, Danio: 55 },
+        descripcion: 'Guardia de élite de Roma. Soldados de infantería pesada elegidos uno a uno, acostumbrados a todo tipo de combate.',
+        descripciones: {
+          es: 'Guardia de élite de Roma. Soldados de infantería pesada elegidos uno a uno, acostumbrados a todo tipo de combate.',
+          en: 'Rome’s elite guard. Hand-picked heavy infantry soldiers, used to all kinds of combat.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Arkangel'
+      },
+      {
+        nombre: 'Triarii',
+        nombres: { es: 'Triarii', en: 'Triarii' },
+        tier: 'VII',
+        img: '/img/tropas/arkangel/triarii.png',
+        stats: { Ataque: 29, Defensa: 24, Vida: 140, Velocidad: 65, Costo: 790, Armadura: 31, Moral: 95, Danio: 64 },
+        descripcion: 'Veteranos de lanza romanos. La riqueza, la experiencia y la edad convierten a estos curtidos veteranos en una fuerza temible.',
+        descripciones: {
+          es: 'Veteranos de lanza romanos. La riqueza, la experiencia y la edad convierten a estos curtidos veteranos en una fuerza temible.',
+          en: 'Roman veteran spearmen. Wealth, experience, and age make these seasoned veterans a formidable force.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Arkangel'
+      },
+      {
+        nombre: 'Gladiador',
+        nombres: { es: 'Gladiador', en: 'Gladiator' },
+        tier: 'VIII',
+        img: '/img/tropas/arkangel/gladiador.png',
+        stats: { Ataque: 67, Defensa: 22, Vida: 100, Velocidad: 65, Costo: 600, Armadura: 39, Moral: 10, Danio: 60 },
+        descripcion: 'Luchador de la arena romana. Infantería pesada muy bien entrenada que no teme a la muerte.',
+        descripciones: {
+          es: 'Luchador de la arena romana. Infantería pesada muy bien entrenada que no teme a la muerte.',
+          en: 'Roman arena fighter. Well-trained heavy infantry that does not fear death.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Arkangel'
+      },
+      // Exclusivas Helenia (Grecia)
+      {
+        nombre: 'Hoplita Espartano',
+        nombres: { es: 'Hoplita Espartano', en: 'Spartan Hoplite' },
+        tier: 'V',
+        img: '/img/tropas/helenia/hoplita_espartano.png',
+        stats: { Ataque: 34, Defensa: 26, Vida: 130, Velocidad: 60, Armadura: 21, Moral: 80, Danio: 57 },
+        descripcion: 'Hoplitas. No hay otra palabra que concentre mejor el significado de griegos en guerra.',
+        descripciones: {
+          es: 'Hoplitas. No hay otra palabra que concentre mejor el significado de "griegos en guerra".',
+          en: 'Hoplites. There is no better word to sum up the meaning of "Greeks at war".'
+        },
+        bloqueado: true, motivo: 'Exclusivo Helenia'
+      },
+      {
+        nombre: 'Falange Macedónica',
+        nombres: { es: 'Falange Macedónica', en: 'Macedonian Phalanx' },
+        tier: 'VI',
+        img: '/img/tropas/helenia/falange_macedonica.png',
+        stats: { Ataque: 34, Defensa: 24, Vida: 110, Velocidad: 55, Armadura: 7, Moral: 65, Danio: 25 },
+        descripcion: 'Esta apretada formación de piqueros es un poderosísimo puño.',
+        descripciones: {
+          es: 'Esta apretada formación de piqueros es un poderosísimo puño.',
+          en: 'This tight formation of pikemen is a most powerful fist.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Helenia'
+      },
+      {
+        nombre: 'Hipaspista',
+        nombres: { es: 'Hipaspista', en: 'Hypaspist' },
+        tier: 'VII',
+        img: '/img/tropas/helenia/hipaspista.png',
+        stats: { Ataque: 38, Defensa: 34, Vida: 120, Velocidad: 60, Armadura: 18, Moral: 75, Danio: 57 },
+        descripcion: 'Estos guerreros fuertemente protegidos son muy peligrosos en combates cuerpo a cuerpo y con sus jabalinas.',
+        descripciones: {
+          es: 'Estos guerreros fuertemente protegidos son muy peligrosos en combates cuerpo a cuerpo y con sus jabalinas.',
+          en: 'These heavily protected warriors are very dangerous in melee and with their javelins.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Helenia'
+      },
+      // Exclusivas Salazar (Galos/norte)
+      {
+        nombre: 'Berserker',
+        nombres: { es: 'Berserker', en: 'Berserker' },
+        tier: 'V',
+        img: '/img/tropas/salazar/berserker.png',
+        stats: { Ataque: 40, Defensa: 10, Vida: 80, Velocidad: 60, Armadura: 10, Moral: 60, Danio: 58 },
+        descripcion: 'Guerreros bárbaros que entran en frenesí y siembran el caos en las filas enemigas.',
+        descripciones: {
+          es: 'Guerreros bárbaros que entran en frenesí y siembran el caos en las filas enemigas.',
+          en: 'Barbarian warriors who go into a frenzy and sow chaos among enemy ranks.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Salazar'
+      },
+      {
+        nombre: 'Perros de Guerra',
+        nombres: { es: 'Perros de Guerra', en: 'War Dogs' },
+        tier: 'VI',
+        img: '/img/tropas/salazar/perros_de_guerra.png',
+        stats: { Ataque: 23, Defensa: 40, Vida: 100, Velocidad: 45, Armadura: 20, Moral: 15, Danio: 68 },
+        descripcion: 'Unos feroces animales entrenados para lanzarse a la garganta del enemigo con el fin de eliminar cualquier posible resistencia.',
+        descripciones: {
+          es: 'Unos feroces animales entrenados para lanzarse a la garganta del enemigo con el fin de eliminar cualquier posible resistencia.',
+          en: 'Ferocious animals trained to go for the enemy’s throat and eliminate any resistance.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Salazar'
+      },
+      {
+        nombre: 'Cazador Germano',
+        nombres: { es: 'Cazador Germano', en: 'Germanic Hunter' },
+        tier: 'VII',
+        img: '/img/tropas/salazar/cazador_germano.png',
+        stats: { Ataque: 25, Defensa: 20, Vida: 80, Velocidad: 50, Armadura: 10, Moral: 45, Danio: 58 },
+        descripcion: 'Un galo puede desenvainar su larga espada en nombre de su tribu y no por ello dejar de ser galo.',
+        descripciones: {
+          es: 'Un galo puede desenvainar su larga espada en nombre de su tribu y no por ello dejar de ser galo.',
+          en: 'A Gaul can draw his long sword for his tribe and still remain a Gaul.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Salazar'
+      },
+      // Exclusivas Albion (Cartago)
+      {
+        nombre: 'Elefantes Cartagineses',
+        nombres: { es: 'Elefantes Cartagineses', en: 'Carthaginian Elephants' },
+        tier: 'V',
+        img: '/img/tropas/albion/elefantes_cartagineses.png',
+        stats: { Ataque: 64, Defensa: 60, Vida: 200, Velocidad: 30, Armadura: 44, Moral: 30, Danio: 910 },
+        descripcion: 'Estas intimidatorias criaturas están entrenadas para atacar y pisotear al enemigo.',
+        descripciones: {
+          es: 'Estas intimidatorias criaturas están entrenadas para atacar y pisotear al enemigo.',
+          en: 'These intimidating creatures are trained to attack and trample the enemy.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Albion'
+      },
+      {
+        nombre: 'Sagrados de Cartago',
+        nombres: { es: 'Sagrados de Cartago', en: 'Sacred Band of Carthage' },
+        tier: 'VI',
+        img: '/img/tropas/albion/sagrados_cartago.png',
+        stats: { Ataque: 42, Defensa: 29, Vida: 200, Velocidad: 65, Armadura: 22, Moral: 105, Danio: 59 },
+        descripcion: 'Los mejores y los más valientes de Cartago, entrenados para luchar como hoplitas.',
+        descripciones: {
+          es: 'Los mejores y los más valientes de Cartago, entrenados para luchar como hoplitas.',
+          en: 'The best and bravest of Carthage, trained to fight as hoplites.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Albion'
+      },
+      {
+        nombre: 'Caballería Númida',
+        nombres: { es: 'Caballería Númida', en: 'Numidian Cavalry' },
+        tier: 'VII',
+        img: '/img/tropas/albion/caballeria_numida.png',
+        stats: { Ataque: 41, Defensa: 25, Vida: 120, Velocidad: 75, Armadura: 34, Moral: 65, Danio: 34 },
+        descripcion: 'Estos excelentes jinetes pueden penetrar las líneas enemigas y causar grandes bajas.',
+        descripciones: {
+          es: 'Estos excelentes jinetes pueden penetrar las líneas enemigas y causar grandes bajas.',
+          en: 'These excellent riders can break through enemy lines and cause great casualties.'
+        },
+        bloqueado: true, motivo: 'Exclusivo Albion'
+      }
+    ];
+
+    async function getUserKingdomAndTiers() {
+      // Llama a la API para obtener el reino y los niveles de las unidades del usuario
+      try {
+        const res = await fetch('/api/usuario');
+        const user = await res.json();
+        // user.kingdom: nombre del reino
+        // user.tiers: { 'Legionario': 2, ... } (deberás implementar esto en tu backend)
+        return user;
+      } catch (e) {
+        return { kingdom: null, tiers: {} };
+      }
+    }
+
+    // Permitir escalado de stats/costo por nivel
+    function getStatsPorNivel(stats, nivel = 1) {
+      // Puedes ajustar los multiplicadores según el balance deseado
+      const mult = 1 + 0.12 * (nivel - 1); // 12% por nivel
+      return {
+        ...stats,
+        Costo: stats.Costo ? Math.round(stats.Costo * mult) : undefined,
+        Ataque: stats.Ataque ? Math.round(stats.Ataque * mult) : undefined,
+        Defensa: stats.Defensa ? Math.round(stats.Defensa * mult) : undefined,
+        Vida: stats.Vida ? Math.round(stats.Vida * mult) : undefined,
+        Armadura: stats.Armadura ? Math.round(stats.Armadura * mult) : undefined,
+        Moral: stats.Moral ? Math.round(stats.Moral * mult) : undefined,
+        Danio: stats.Danio ? Math.round(stats.Danio * mult) : undefined,
+      };
+    }
+
+    async function renderTropas(selectedIdx = null) {
+      const t = textos[lang];
+      const user = await getUserKingdomAndTiers();
+      const list = document.getElementById('tropas-list');
+      list.innerHTML = '';
+      const desbloqueadas = [], bloqueadas = [];
+      const userKingdom = (user.reino || '').toLowerCase();
+      tropas.forEach((tropa, idx) => {
+        // Determina exclusividad y color
+        let colorExclusiva = '';
+        let motivo = '';
+        if (tropa.motivo && tropa.motivo.startsWith('Exclusivo')) {
+          const reino = tropa.motivo.split(' ')[1].toLowerCase();
+          colorExclusiva = 'exclusiva-' + reino;
+        } else if (tropa.bloqueado && tropa.motivo && tropa.motivo.toLowerCase().includes('cofre')) {
+          colorExclusiva = 'exclusiva-cofre';
+        } else if (!tropa.bloqueado) {
+          colorExclusiva = 'exclusiva-basica';
+        }
+        // Lógica de bloqueo
+        let bloqueadaCard = tropa.bloqueado;
+        if (tropa.motivo && tropa.motivo.startsWith('Exclusivo')) {
+          const reino = tropa.motivo.split(' ')[1].toLowerCase();
+          if (userKingdom === reino) bloqueadaCard = false;
+        }
+        // Motivo de bloqueo
+        if (bloqueadaCard) {
+          if (tropa.motivo && tropa.motivo.startsWith('Exclusivo')) {
+            motivo = t.bloqueado + ' ' + tropa.motivo;
+          } else if (tropa.motivo && tropa.motivo.toLowerCase().includes('cofre')) {
+            motivo = t.bloqueado + ' ' + (t.soloCofres || tropa.motivo);
+          } else {
+            motivo = tropa.motivo || '';
+          }
+        }
+        // Tier y legiones
+        const tierUsuario = user.tiers && user.tiers[tropa.nombre] ? Math.max(1, Math.min(9, user.tiers[tropa.nombre])) : 1;
+        const legiones = user.legiones && user.legiones[tropa.nombre] ? user.legiones[tropa.nombre] : 0;
+        // Renderizado de carta
+        const div = document.createElement('div');
+        div.className = [
+          'tropa-card bg-gray-800 p-4 rounded-xl shadow flex flex-col items-center transition-all duration-300',
+          selectedIdx === idx ? 'selected animate__animated animate__pulse' : selectedIdx !== null ? 'unselected' : '',
+          colorExclusiva
+        ].filter(Boolean).join(' ');
+        if (bloqueadaCard) div.classList.add('unselected');
+        div.onclick = () => {
+          if (selectedIdx === idx) {
+            renderTropas(null);
+            renderDetails(null, 1, user);
+          } else if (!bloqueadaCard) {
+            renderTropas(idx);
+            renderDetails(idx, tierUsuario, user);
+          }
+        };
+        const nombre = tropa.nombres ? tropa.nombres[lang] : tropa.nombre;
+        div.innerHTML = `
+          <h2 class=\"text-lg font-semibold mb-1\">${nombre}</h2>
+          <span class=\"text-gray-400 mb-1\">${t.tier} ${tierUsuario} | ${t.legiones}: ${legiones}</span>
+          <img src=\"${tropa.img}\" alt=\"${nombre}\" class=\"mb-1 object-contain animate__animated animate__fadeIn\"/>
+          ${bloqueadaCard && motivo ? `<span class='text-red-400 text-xs mb-1'>${motivo}</span>` : ''}
+        `;
+        (bloqueadaCard ? bloqueadas : desbloqueadas).push(div);
+      });
+      // Renderizar primero desbloqueadas, luego bloqueadas
+      if (desbloqueadas.length) {
+        const titulo = document.createElement('h3');
+        titulo.className = 'text-xl font-bold mb-2 col-span-full';
+        titulo.textContent = lang === 'es' ? 'Tus tropas' : 'Your troops';
+        list.appendChild(titulo);
+        desbloqueadas.forEach(div => list.appendChild(div));
+      }
+      if (bloqueadas.length) {
+        const titulo = document.createElement('h3');
+        titulo.className = 'text-xl font-bold mt-6 mb-2 col-span-full text-gray-400';
+        titulo.textContent = lang === 'es' ? 'Bloqueadas' : 'Locked';
+        list.appendChild(titulo);
+        bloqueadas.forEach(div => list.appendChild(div));
+      }
+    }
+
+    function renderDetails(idx, tierUsuario = 1, user = {}) {
+      const t = textos[lang];
+      const details = document.getElementById('tropa-details');
+      if (idx === null) {
+        details.classList.add('hidden');
+        details.innerHTML = '';
+        return;
+      }
+      const tropa = tropas[idx];
+      const nombre = tropa.nombres ? tropa.nombres[lang] : tropa.nombre;
+      const descripcion = tropa.descripciones ? tropa.descripciones[lang] : tropa.descripcion;
+      // Contador de legiones (por defecto 0 si no hay dato)
+      const legiones = (user.legiones && user.legiones[tropa.nombre]) ? user.legiones[tropa.nombre] : 0;
+      const bloqueadaDetalle = tropa.bloqueado && (!tropa.motivo || (user.reino && tropa.motivo.toLowerCase().includes(user.reino.toLowerCase()) === false));
+      // Usar stats escalados por nivel
+      const statsNivel = getStatsPorNivel(tropa.stats, tierUsuario);
+      // Construir string de stats extendidos (todos juntos y traducidos, sin tamaño ni tipo)
+      let statsExtra = '';
+      if (tropa.stats) {
+        const extra = [];
+        if (tropa.stats.Ataque) extra.push(`<li><b>${t.ataque || 'Ataque'}:</b> ${tropa.stats.Ataque}</li>`);
+        if (tropa.stats.Defensa) extra.push(`<li><b>${t.defensa || 'Defensa'}:</b> ${tropa.stats.Defensa}</li>`);
+        if (tropa.stats.Vida) extra.push(`<li><b>${t.vida || 'Vida'}:</b> ${tropa.stats.Vida}</li>`);
+        if (tropa.stats.Velocidad) extra.push(`<li><b>${t.velocidad || 'Velocidad'}:</b> ${tropa.stats.Velocidad}</li>`);
+        if (tropa.stats.Costo) extra.push(`<li><b>${t.costo || 'Costo'}:</b> ${tropa.stats.Costo}</li>`);
+        if (tropa.stats.Armadura) extra.push(`<li><b>${t.armadura || 'Armadura'}:</b> ${tropa.stats.Armadura}</li>`);
+        if (tropa.stats.Moral) extra.push(`<li><b>${t.moral || 'Moral'}:</b> ${tropa.stats.Moral}</li>`);
+        if (tropa.stats.Municion) extra.push(`<li><b>${t.municion || 'Munición'}:</b> ${tropa.stats.Municion}</li>`);
+        if (tropa.stats.Danio) extra.push(`<li><b>${t.danio || 'Daño arma'}:</b> ${tropa.stats.Danio}</li>`);
+        if (tropa.stats.Alcance) extra.push(`<li><b>${t.alcance || 'Alcance'}:</b> ${tropa.stats.Alcance}</li>`);
+        statsExtra = `<ul class='mb-3 text-gray-300 text-base'>${extra.join('')}</ul>`;
+      }
+      details.classList.remove('hidden');
+      details.innerHTML = `
+        <div style=\"display:flex;align-items:center;gap:1rem;\">
+          <h2 class=\"text-xl font-bold mb-2 animate__animated animate__fadeInRight\" style=\"min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${nombre}</h2>
+        </div>
+        <img src=\"${tropa.img}\" alt=\"${nombre}\" class=\"w-20 h-20 mb-3 object-contain mx-auto animate__animated animate__fadeIn\"/>
+        <div class=\"mb-2 text-gray-300\">${t.tier}: <span class=\"font-semibold\">${tierUsuario}</span> | ${t.legiones}: <span class=\"font-semibold\">${legiones}</span></div>
+        ${statsExtra}
+        <div class=\"mb-2 text-gray-400 text-base\"><b>${t.descripcion}:</b> ${descripcion}</div>
+        <div class=\"flex flex-row gap-2 w-full justify-center mt-4\">
+          <button class=\"bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition-all duration-300\" ${bloqueadaDetalle ? 'disabled' : ''}>${t.reclutar}</button>
+          <button class=\"bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded transition-all duration-300\" ${bloqueadaDetalle ? 'disabled' : ''}>${t.mejorar || 'Mejorar'}</button>
+        </div>
+      `;
+    }
+
+    // Permitir cambio de idioma desde main.html
+    window.addEventListener('setLang', e => {
+      lang = e.detail;
+      localStorage.setItem('lang', lang);
+      renderTropas();
+      renderDetails(null);
+    });
+
+    // Animación de entrada para toda la página
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-in').forEach(el => {
+        setTimeout(() => el.classList.add('show'), 100);
+      });
+      renderTropas();
+      renderDetails(null);
+    });
+  </script>
+</body>
+</html>

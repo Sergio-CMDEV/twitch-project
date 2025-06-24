@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3 animate__animated animate__fadeInDown">
+      <i class="fa-solid fa-chart-line text-green-400 animate__animated animate__pulse animate__infinite"></i> <span id="estadisticas-title">Estadísticas</span>
+    </h1>
+    <div id="estadisticas-content" class="space-y-4"></div>
+  </div>
+  <script>
+    const estadisticasText = {
+      es: { title: 'Estadísticas', victorias: 'Victorias', derrotas: 'Derrotas', edificios: 'Edificios construidos', tropas: 'Tropas perdidas', empty: 'No hay estadísticas.' },
+      en: { title: 'Statistics', victorias: 'Wins', derrotas: 'Losses', edificios: 'Buildings built', tropas: 'Troops lost', empty: 'No statistics.' }
+    };
+    function setLangEstadisticas(lang) {
+      document.getElementById('estadisticas-title').textContent = estadisticasText[lang].title;
+      cargarEstadisticas(lang);
+    }
+    async function cargarEstadisticas(lang = 'es') {
+      const est = await fetch('/api/estadisticas').then(r => r.json()).catch(() => null);
+      const cont = document.getElementById('estadisticas-content');
+      cont.innerHTML = '';
+      if (!est) {
+        cont.innerHTML = `<div class='text-gray-400'>${estadisticasText[lang].empty}</div>`;
+        return;
+      }
+      cont.innerHTML = `
+        <div class='flex justify-between bg-gray-800 rounded-xl p-4 shadow-lg animate__animated animate__fadeInUp'><span>${estadisticasText[lang].victorias}:</span><span class='font-bold text-green-400'>${est.victorias ?? 0}</span></div>
+        <div class='flex justify-between bg-gray-800 rounded-xl p-4 shadow-lg animate__animated animate__fadeInUp'><span>${estadisticasText[lang].derrotas}:</span><span class='font-bold text-red-400'>${est.derrotas ?? 0}</span></div>
+        <div class='flex justify-between bg-gray-800 rounded-xl p-4 shadow-lg animate__animated animate__fadeInUp'><span>${estadisticasText[lang].edificios}:</span><span class='font-bold text-pink-400'>${est.edificios ?? 0}</span></div>
+        <div class='flex justify-between bg-gray-800 rounded-xl p-4 shadow-lg animate__animated animate__fadeInUp'><span>${estadisticasText[lang].tropas}:</span><span class='font-bold text-blue-400'>${est.tropas_perdidas ?? 0}</span></div>
+      `;
+    }
+    window.addEventListener('setLang', e => setLangEstadisticas(e.detail));
+    document.addEventListener('DOMContentLoaded', () => setLangEstadisticas('es'));
+  </script>
+</body>
+</html>

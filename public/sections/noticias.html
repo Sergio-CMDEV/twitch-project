@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Noticias</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3 animate__animated animate__fadeInDown">
+      <i class="fa-solid fa-newspaper text-blue-400 animate__animated animate__pulse animate__infinite"></i> <span id="noticias-title">Noticias</span>
+    </h1>
+    <div id="noticias-content" class="space-y-6">
+      <div class="text-gray-400 animate__animated animate__fadeIn">Cargando noticias...</div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      if (window.noticiasScriptLoaded) return;
+      window.noticiasScriptLoaded = true;
+      const noticiasText = {
+        es: { title: 'Noticias', empty: 'No hay noticias recientes.' },
+        en: { title: 'News', empty: 'No recent news.' }
+      };
+      function setLangNoticias(lang) {
+        document.getElementById('noticias-title').textContent = noticiasText[lang].title;
+        cargarNoticias(lang);
+      }
+      async function cargarNoticias(lang = 'es') {
+        let noticias = await fetch('/api/noticias').then(r => r.json()).catch(() => []);
+        noticias = noticias.filter(n => n.id && n.titulo && n.resumen && n.fecha);
+        const cont = document.getElementById('noticias-content');
+        cont.innerHTML = '';
+        if (!noticias.length) {
+          cont.innerHTML = `<div class='text-gray-400'>${noticiasText[lang].empty}</div>`;
+          return;
+        }
+        let selectedId = window.selectedNoticiaId;
+        if (selectedId) {
+          const idx = noticias.findIndex(n => n.id == selectedId);
+          if (idx > -1) {
+            const noticia = noticias.splice(idx, 1)[0];
+            noticias.unshift(noticia);
+          }
+          window.selectedNoticiaId = null;
+        }
+        noticias.forEach((n, i) => {
+          const div = document.createElement('div');
+          div.className = 'bg-gray-800 rounded-xl p-6 shadow-lg animate__animated animate__fadeInUp' + (i === 0 && selectedId ? ' ring-4 ring-blue-400' : '');
+          div.innerHTML = `<div class='flex items-center gap-3 mb-2'><span class='text-blue-300'><i class='fa-solid fa-bullhorn'></i></span><span class='font-bold text-lg'>${n.titulo}</span></div><div class='text-gray-400 text-xs mb-2'>${new Date(n.fecha).toLocaleDateString()}</div><div>${n.resumen}</div>`;
+          cont.appendChild(div);
+        });
+      }
+      window.setLangNoticias = setLangNoticias;
+      window.addEventListener('setLang', e => setLangNoticias(e.detail));
+      document.addEventListener('DOMContentLoaded', () => setLangNoticias('es'));
+    })();
+  </script>
+</body>
+</html>

@@ -11,10 +11,12 @@
   "description": "",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "mysql2": "^3.14.1",
+    "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
     "passport-twitch-new": "^0.0.3",
     "promise": "^8.3.0",

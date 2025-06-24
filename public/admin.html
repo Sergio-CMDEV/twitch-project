@@ -1,9 +1,499 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><title>Panel Admin</title></head>
-<body>
-    <h1>Panel de Administración</h1>
-    <p>Aquí el admin podrá gestionar usuarios, reinos y legiones en el futuro.</p>
-    <a href="/">Volver</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+      <h1 class="text-3xl font-bold flex items-center gap-3 animate__animated animate__fadeInDown">
+        <i class="fa-solid fa-crown text-yellow-400 animate__animated animate__pulse animate__infinite"></i> Panel de Administración
+      </h1>
+      <nav class="flex gap-2 md:gap-4">
+        <button onclick="showAdminSection('usuarios')" id="btn-usuarios" class="admin-nav-btn bg-blue-600">Usuarios</button>
+        <button onclick="showAdminSection('reinos')" id="btn-reinos" class="admin-nav-btn bg-green-600">Reinos</button>
+        <button onclick="showAdminSection('legiones')" id="btn-legiones" class="admin-nav-btn bg-yellow-500 text-gray-900">Legiones</button>
+        <button onclick="showAdminSection('noticias')" id="btn-noticias" class="admin-nav-btn bg-blue-900">Noticias</button>
+        <button onclick="window.location.href='/'" class="admin-nav-btn bg-red-600">Volver</button>
+      </nav>
+    </div>
+    <div id="admin-section-usuarios" class="admin-section hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-blue-600"><i class="fa-solid fa-users"></i></span> Usuarios</h2>
+        <div class="flex flex-col md:flex-row md:items-center gap-2 mb-4">
+          <input type="text" id="usuario-buscar" class="border rounded px-3 py-2 flex-1" placeholder="Buscar por nombre o ID...">
+        </div>
+        <div id="usuario-msg" class="mb-2 text-sm"></div>
+        <div id="usuarios-paginacion" class="flex gap-2 mb-2"></div>
+        <ul id="lista-usuarios" class="space-y-2"></ul>
+      </div>
+    </div>
+    <div id="admin-section-reinos" class="admin-section hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-green-600"><i class="fa-solid fa-chess-king"></i></span> Reinos</h2>
+        <form id="form-reino" class="flex flex-col md:flex-row gap-2 mb-4">
+          <input type="text" id="reino-nombre" class="border rounded px-3 py-2 flex-1" placeholder="Nombre del reino" required maxlength="32">
+          <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold">Añadir reino</button>
+        </form>
+        <div id="reino-msg" class="mb-2 text-sm"></div>
+        <ul id="lista-reinos" class="space-y-2"></ul>
+      </div>
+    </div>
+    <div id="admin-section-legiones" class="admin-section hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-yellow-500"><i class="fa-solid fa-shield-halved"></i></span> Legiones</h2>
+        <form id="form-legion" class="flex flex-col md:flex-row gap-2 mb-4">
+          <input type="text" id="legion-nombre" class="border rounded px-3 py-2 flex-1" placeholder="Nombre de la legión" required maxlength="32">
+          <input type="text" id="legion-reino" class="border rounded px-3 py-2 flex-1" placeholder="Reino" required maxlength="32">
+          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded font-bold">Añadir legión</button>
+        </form>
+        <div id="legion-msg" class="mb-2 text-sm"></div>
+        <ul id="lista-legiones" class="space-y-2"></ul>
+      </div>
+    </div>
+    <div id="admin-section-noticias" class="admin-section">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-blue-600"><i class="fa-solid fa-newspaper"></i></span> Añadir noticia</h2>
+        <form id="form-noticia" class="space-y-4">
+          <div>
+            <label class="block font-semibold mb-1">Título</label>
+            <input type="text" id="noticia-titulo" class="w-full border rounded px-3 py-2" required maxlength="100">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Resumen</label>
+            <textarea id="noticia-resumen" class="w-full border rounded px-3 py-2" required maxlength="300"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold transition">Añadir noticia</button>
+          <div id="noticia-msg" class="mt-2 text-sm"></div>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-red-600"><i class="fa-solid fa-trash"></i></span> Eliminar noticia</h2>
+        <ul id="lista-noticias" class="space-y-3"></ul>
+        <div id="eliminar-msg" class="mt-2 text-sm"></div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-lg p-6 mt-10 animate__animated animate__fadeInUp">
+      <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-purple-600"><i class="fa-solid fa-chart-line"></i></span> Estadísticas rápidas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-100 rounded-xl p-5 flex flex-col items-center shadow-lg">
+          <div class="text-4xl mb-2 text-yellow-400"><i class="fa-solid fa-users"></i></div>
+          <div class="text-2xl font-bold" id="admin-users-count">...</div>
+          <div class="text-gray-400">Usuarios registrados</div>
+        </div>
+        <div class="bg-gray-100 rounded-xl p-5 flex flex-col items-center shadow-lg">
+          <div class="text-4xl mb-2 text-green-400"><i class="fa-solid fa-chess-king"></i></div>
+          <div class="text-2xl font-bold" id="admin-reinos-count">...</div>
+          <div class="text-gray-400">Reinos activos</div>
+        </div>
+        <div class="bg-gray-100 rounded-xl p-5 flex flex-col items-center shadow-lg">
+          <div class="text-4xl mb-2 text-pink-400"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="text-2xl font-bold" id="admin-legiones-count">...</div>
+          <div class="text-gray-400">Legiones creadas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+  <script>
+    // Navegación entre secciones admin
+    function showAdminSection(section) {
+      document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById('btn-' + section).classList.add('active');
+      document.getElementById('admin-section-' + section).classList.add('active');
+    }
+    // Mostrar sección por defecto
+    showAdminSection('noticias');
+
+    // Añadir noticia
+    document.getElementById('form-noticia').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const titulo = document.getElementById('noticia-titulo').value.trim();
+      const resumen = document.getElementById('noticia-resumen').value.trim();
+      const msg = document.getElementById('noticia-msg');
+      msg.textContent = '';
+      if (!titulo || !resumen) {
+        msg.textContent = 'Completa todos los campos.';
+        msg.className = 'text-red-600';
+        return;
+      }
+      const res = await fetch('/api/noticias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo, resumen })
+      });
+      if (res.ok) {
+        msg.textContent = 'Noticia añadida correctamente.';
+        msg.className = 'text-green-600';
+        document.getElementById('form-noticia').reset();
+        cargarNoticiasAdmin();
+      } else {
+        msg.textContent = 'Error al añadir noticia.';
+        msg.className = 'text-red-600';
+      }
+    });
+
+    // Cargar y mostrar noticias para eliminar
+    async function cargarNoticiasAdmin() {
+      const lista = document.getElementById('lista-noticias');
+      const msg = document.getElementById('eliminar-msg');
+      lista.innerHTML = '<li class="text-gray-400">Cargando noticias...</li>';
+      msg.textContent = '';
+      const noticias = await fetch('/api/noticias').then(r => r.json()).catch(() => []);
+      lista.innerHTML = '';
+      if (!noticias.length) {
+        lista.innerHTML = '<li class="text-gray-400">No hay noticias.</li>';
+        return;
+      }
+      noticias.forEach(noticia => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-gray-100 text-gray-800 rounded p-2';
+        li.innerHTML = `<span><b>${noticia.titulo}</b> <span class='text-xs text-gray-500'>${new Date(noticia.fecha).toLocaleDateString()}</span></span>`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Eliminar';
+        btn.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold ml-4';
+        btn.onclick = async () => {
+          if (!confirm('¿Seguro que quieres eliminar esta noticia?')) return;
+          const res = await fetch(`/api/noticias/${noticia.id}`, { method: 'DELETE' });
+          if (res.ok) {
+            msg.textContent = 'Noticia eliminada correctamente.';
+            msg.className = 'text-green-600';
+            cargarNoticiasAdmin();
+          } else {
+            msg.textContent = 'Error al eliminar noticia.';
+            msg.className = 'text-red-600';
+          }
+        };
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', cargarNoticiasAdmin);
+
+    // Estadísticas rápidas
+    async function cargarEstadisticasAdmin() {
+      // Usuarios
+      const usuarios = await fetch('/api/usuarios-count').then(r => r.json()).catch(() => ({ count: 0 }));
+      document.getElementById('admin-users-count').textContent = usuarios.count;
+      // Reinos activos
+      const reinos = await fetch('/api/reinos-count').then(r => r.json()).catch(() => ({ count: 0 }));
+      document.getElementById('admin-reinos-count').textContent = reinos.count;
+      // Legiones
+      const legiones = await fetch('/api/legiones-count').then(r => r.json()).catch(() => ({ count: 0 }));
+      document.getElementById('admin-legiones-count').textContent = legiones.count;
+    }
+    document.addEventListener('DOMContentLoaded', cargarEstadisticasAdmin);
+
+    // Usuarios con paginación, búsqueda y edición
+    let usuariosPagina = 1;
+    let usuariosTotalPaginas = 1;
+    let usuariosUltimaBusqueda = '';
+
+    async function cargarUsuarios(pagina = 1, busqueda = '') {
+      const lista = document.getElementById('lista-usuarios');
+      const msg = document.getElementById('usuario-msg');
+      const paginacion = document.getElementById('usuarios-paginacion');
+      lista.innerHTML = '<li class="text-gray-400">Cargando usuarios...</li>';
+      msg.textContent = '';
+      usuariosPagina = pagina;
+      usuariosUltimaBusqueda = busqueda;
+      // API: /api/usuarios?pagina=1&busqueda=xxx
+      const res = await fetch(`/api/usuarios?pagina=${pagina}&busqueda=${encodeURIComponent(busqueda)}`);
+      const data = await res.json().catch(() => ({ usuarios: [], totalPaginas: 1 }));
+      // DEBUG: Mostrar en consola lo que devuelve el backend
+      console.log('Respuesta /api/usuarios:', data);
+      const usuarios = data.usuarios || [];
+      usuariosTotalPaginas = data.totalPaginas || 1;
+      lista.innerHTML = '';
+      if (!usuarios.length) {
+        lista.innerHTML = '<li class="text-gray-400">No hay usuarios.</li>';
+        paginacion.innerHTML = '';
+        return;
+      }
+      usuarios.forEach(usuario => {
+        const li = document.createElement('li');
+        li.className = 'flex flex-col md:flex-row md:items-center justify-between bg-gray-100 text-gray-800 rounded p-2 gap-2';
+        // Si no hay imagen, usa la de Twitch por defecto, y si falla, la local
+        const imgUrl = usuario.profile_image_url || '/img/default-profile.png';
+        li.innerHTML = `
+          <div class='flex flex-col md:flex-row md:items-center gap-4 flex-1'>
+            <span class='font-bold text-lg text-blue-700'>ID: ${usuario.id}</span>
+            <img src='${imgUrl}' alt='avatar' class='w-10 h-10 rounded-full border-2 border-blue-300 mx-2' onerror="this.onerror=null;this.src='/img/default-profile.png';">
+            <span class='font-semibold'>${usuario.nombre}</span>
+            <select class='usuario-reino-edit border rounded px-2 py-1 w-32 md:w-40' data-id='${usuario.id}'>
+              <option value='Arkangel' ${usuario.reino === 'Arkangel' ? 'selected' : ''}>Arkangel</option>
+              <option value='Salazar' ${usuario.reino === 'Salazar' ? 'selected' : ''}>Salazar</option>
+              <option value='Helenia' ${usuario.reino === 'Helenia' ? 'selected' : ''}>Helenia</option>
+              <option value='Albion' ${usuario.reino === 'Albion' ? 'selected' : ''}>Albion</option>
+            </select>
+          </div>
+          <div class='flex gap-2'>
+            <button class='bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded font-bold usuario-guardar-btn' data-id='${usuario.id}'>Guardar</button>
+            <button class='bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold usuario-eliminar-btn' data-id='${usuario.id}'>Eliminar</button>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+      // Mensaje de log debajo de la lista
+      let logDiv = document.getElementById('usuario-log');
+      if (!logDiv) {
+        logDiv = document.createElement('div');
+        logDiv.id = 'usuario-log';
+        logDiv.className = 'mt-4 text-center text-base';
+        lista.parentNode.appendChild(logDiv);
+      } else {
+        logDiv.textContent = '';
+      }
+      // Botones de paginación
+      paginacion.innerHTML = '';
+      for (let i = 1; i <= usuariosTotalPaginas; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = 'px-2 py-1 rounded ' + (i === usuariosPagina ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700');
+        btn.onclick = () => cargarUsuarios(i, usuariosUltimaBusqueda);
+        paginacion.appendChild(btn);
+      }
+    }
+    // Buscar usuarios
+    const buscarInput = document.getElementById('usuario-buscar');
+    buscarInput.addEventListener('input', function() {
+      cargarUsuarios(1, buscarInput.value.trim());
+    });
+    // Guardar cambios usuario
+    document.addEventListener('click', async function(e) {
+      if (e.target.classList.contains('usuario-guardar-btn')) {
+        const id = e.target.dataset.id;
+        const reino = document.querySelector(`.usuario-reino-edit[data-id='${id}']`).value.trim();
+        let logDiv = document.getElementById('usuario-log');
+        if (!logDiv) {
+          logDiv = document.createElement('div');
+          logDiv.id = 'usuario-log';
+          logDiv.className = 'mt-4 text-center text-base';
+          document.getElementById('lista-usuarios').parentNode.appendChild(logDiv);
+        }
+        const msg = document.getElementById('usuario-msg');
+        msg.textContent = '';
+        if (!reino) {
+          logDiv.textContent = 'Completa el campo reino.';
+          logDiv.className = 'mt-4 text-center text-base text-red-600';
+          return;
+        }
+        try {
+          const res = await fetch(`/api/usuarios/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reino })
+          });
+          if (res.ok) {
+            logDiv.textContent = 'Usuario actualizado correctamente.';
+            logDiv.className = 'mt-4 text-center text-base text-green-600';
+            cargarUsuarios(usuariosPagina, usuariosUltimaBusqueda);
+          } else {
+            const data = await res.json().catch(() => ({}));
+            logDiv.textContent = data.error || 'Error al actualizar usuario.';
+            logDiv.className = 'mt-4 text-center text-base text-red-600';
+          }
+        } catch (err) {
+          logDiv.textContent = 'Error de red al actualizar usuario.';
+          logDiv.className = 'mt-4 text-center text-base text-red-600';
+        }
+      }
+      // Eliminar usuario
+      if (e.target.classList.contains('usuario-eliminar-btn')) {
+        const id = e.target.dataset.id;
+        const msg = document.getElementById('usuario-msg');
+        if (!confirm('¿Seguro que quieres eliminar este usuario?')) return;
+        const res = await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          msg.textContent = 'Usuario eliminado correctamente.';
+          msg.className = 'text-green-600';
+          cargarUsuarios(usuariosPagina, usuariosUltimaBusqueda);
+        } else {
+          msg.textContent = 'Error al eliminar usuario.';
+          msg.className = 'text-red-600';
+        }
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => cargarUsuarios());
+   
+    document.getElementById('form-usuario').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('usuario-nombre').value.trim();
+      const reino = document.getElementById('usuario-reino').value.trim();
+      const msg = document.getElementById('usuario-msg');
+      msg.textContent = '';
+      if (!nombre || !reino) {
+        msg.textContent = 'Completa todos los campos.';
+        msg.className = 'text-red-600';
+        return;
+      }
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, reino })
+      });
+      if (res.ok) {
+        msg.textContent = 'Usuario añadido correctamente.';
+        msg.className = 'text-green-600';
+        document.getElementById('form-usuario').reset();
+        cargarUsuarios();
+      } else {
+        msg.textContent = 'Error al añadir usuario.';
+        msg.className = 'text-red-600';
+      }
+    });
+    document.addEventListener('DOMContentLoaded', cargarUsuarios);
+    // Reinos
+    async function cargarReinos() {
+      const lista = document.getElementById('lista-reinos');
+      const msg = document.getElementById('reino-msg');
+      lista.innerHTML = '<li class="text-gray-400">Cargando reinos...</li>';
+      msg.textContent = '';
+      const reinos = await fetch('/api/reinos').then(r => r.json()).catch(() => []);
+      lista.innerHTML = '';
+      if (!reinos.length) {
+        lista.innerHTML = '<li class="text-gray-400">No hay reinos.</li>';
+        return;
+      }
+      reinos.forEach(reino => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-gray-100 text-gray-800 rounded p-2';
+        li.innerHTML = `<span><b>${reino.nombre}</b></span>`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Eliminar';
+        btn.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold ml-4';
+        btn.onclick = async () => {
+          if (!confirm('¿Seguro que quieres eliminar este reino?')) return;
+          const res = await fetch(`/api/reinos/${reino.id}`, { method: 'DELETE' });
+          if (res.ok) {
+            msg.textContent = 'Reino eliminado correctamente.';
+            msg.className = 'text-green-600';
+            cargarReinos();
+          } else {
+            msg.textContent = 'Error al eliminar reino.';
+            msg.className = 'text-red-600';
+          }
+        };
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+    }
+    document.getElementById('form-reino').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('reino-nombre').value.trim();
+      const msg = document.getElementById('reino-msg');
+      msg.textContent = '';
+      if (!nombre) {
+        msg.textContent = 'Completa el campo.';
+        msg.className = 'text-red-600';
+        return;
+      }
+      const res = await fetch('/api/reinos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre })
+      });
+      if (res.ok) {
+        msg.textContent = 'Reino añadido correctamente.';
+        msg.className = 'text-green-600';
+        document.getElementById('form-reino').reset();
+        cargarReinos();
+      } else {
+        msg.textContent = 'Error al añadir reino.';
+        msg.className = 'text-red-600';
+      }
+    });
+    document.addEventListener('DOMContentLoaded', cargarReinos);
+    // Legiones
+    async function cargarLegiones() {
+      const lista = document.getElementById('lista-legiones');
+      const msg = document.getElementById('legion-msg');
+      lista.innerHTML = '<li class="text-gray-400">Cargando legiones...</li>';
+      msg.textContent = '';
+      const legiones = await fetch('/api/legiones').then(r => r.json()).catch(() => []);
+      lista.innerHTML = '';
+      if (!legiones.length) {
+        lista.innerHTML = '<li class="text-gray-400">No hay legiones.</li>';
+        return;
+      }
+      legiones.forEach(legion => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-gray-100 text-gray-800 rounded p-2';
+        li.innerHTML = `<span><b>${legion.nombre}</b> <span class='text-xs text-gray-500'>(${legion.reino})</span></span>`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Eliminar';
+        btn.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold ml-4';
+        btn.onclick = async () => {
+          if (!confirm('¿Seguro que quieres eliminar esta legión?')) return;
+          const res = await fetch(`/api/legiones/${legion.id}`, { method: 'DELETE' });
+          if (res.ok) {
+            msg.textContent = 'Legión eliminada correctamente.';
+            msg.className = 'text-green-600';
+            cargarLegiones();
+          } else {
+            msg.textContent = 'Error al eliminar legión.';
+            msg.className = 'text-red-600';
+          }
+        };
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+    }
+    document.getElementById('form-legion').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('legion-nombre').value.trim();
+      const reino = document.getElementById('legion-reino').value.trim();
+      const msg = document.getElementById('legion-msg');
+      msg.textContent = '';
+      if (!nombre || !reino) {
+        msg.textContent = 'Completa todos los campos.';
+        msg.className = 'text-red-600';
+        return;
+      }
+      const res = await fetch('/api/legiones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, reino })
+      });
+      if (res.ok) {
+        msg.textContent = 'Legión añadida correctamente.';
+        msg.className = 'text-green-600';
+        document.getElementById('form-legion').reset();
+        cargarLegiones();
+      } else {
+        msg.textContent = 'Error al añadir legión.';
+        msg.className = 'text-red-600';
+      }
+    });
+    document.addEventListener('DOMContentLoaded', cargarLegiones);
+  </script>
+  <style>
+    .admin-nav-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      color: #fff;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px #0001;
+      outline: none;
+      cursor: pointer;
+    }
+    .admin-nav-btn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .admin-nav-btn.active, .admin-nav-btn:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px #2563eb33;
+    }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+  </style>
 </body>
 </html>

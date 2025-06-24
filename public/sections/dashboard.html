@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    .card-animate { animation: fadeInUp 0.8s cubic-bezier(.4,0,.2,1); }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .glow {
+      box-shadow: 0 0 16px 2px #22d3ee44, 0 0 0 2px #22d3ee;
+    }
+    .quick-link:hover { filter: brightness(1.15) drop-shadow(0 0 8px #fff3); }
+    .news-badge { background: #2563eb; color: #fff; border-radius: 0.5rem; font-size: 0.8rem; padding: 0.2rem 0.7rem; margin-left: 0.5rem; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3 animate__animated animate__fadeInDown">
+      <i class="fa-solid fa-gauge-high text-green-400 animate__animated animate__pulse animate__infinite"></i> Dashboard
+    </h1>
+    <!-- Resumen rápido -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-gray-800 rounded-xl p-5 flex flex-col items-center shadow-lg card-animate glow">
+        <div class="text-4xl mb-2 text-yellow-400 animate__animated animate__fadeInLeft"><i class="fa-solid fa-coins"></i></div>
+        <div class="text-2xl font-bold" id="gold-count">...</div>
+        <div class="text-gray-400">Oro</div>
+      </div>
+      <div class="bg-gray-800 rounded-xl p-5 flex flex-col items-center shadow-lg card-animate">
+        <div class="text-4xl mb-2 text-blue-400 animate__animated animate__fadeInLeft"><i class="fa-solid fa-users"></i></div>
+        <div class="text-2xl font-bold" id="tropas-count">...</div>
+        <div class="text-gray-400">Tropas</div>
+      </div>
+      <div class="bg-gray-800 rounded-xl p-5 flex flex-col items-center shadow-lg card-animate">
+        <div class="text-4xl mb-2 text-pink-400 animate__animated animate__fadeInLeft"><i class="fa-solid fa-building"></i></div>
+        <div class="text-2xl font-bold" id="edificios-count">...</div>
+        <div class="text-gray-400">Edificios</div>
+      </div>
+    </div>
+    <!-- Sección de actividad reciente, noticias y estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg card-animate">
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-bolt text-yellow-300"></i>Actividad Reciente</h2>
+        <ul class="space-y-3 text-gray-200" id="actividad-list">
+          <!-- El contenido se rellena dinámicamente por JS -->
+        </ul>
+      </div>
+      <!-- Noticias funcional -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg card-animate">
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-newspaper text-blue-300"></i>Noticias <span class="news-badge" id="news-count">0</span></h2>
+        <ul class="space-y-3 text-gray-200" id="noticias-list">
+          <li class="text-gray-400">Cargando noticias...</li>
+        </ul>
+        <a href="#" onclick="loadSection('noticias')" class="block mt-4 text-blue-400 hover:underline text-sm">Ver todas las noticias</a>
+      </div>
+      <!-- Estadísticas funcional -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg card-animate">
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-line text-green-300"></i>Estadísticas</h2>
+        <div id="estadisticas-content" class="space-y-2">
+          <div class="flex justify-between"><span>Victorias:</span><span id="victorias">...</span></div>
+          <div class="flex justify-between"><span>Derrotas:</span><span id="derrotas">...</span></div>
+          <div class="flex justify-between"><span>Edificios construidos:</span><span id="edif-const">...</span></div>
+          <div class="flex justify-between"><span>Tropas perdidas:</span><span id="tropas-perdidas">...</span></div>
+        </div>
+        <a href="estadisticas.html" class="block mt-4 text-green-400 hover:underline text-sm">Ver estadísticas completas</a>
+      </div>
+    </div>
+    <!-- Accesos rápidos -->
+    <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+      <a href="#" onclick="loadSection('mapa')" class="bg-green-700 hover:bg-green-800 transition rounded-xl p-4 flex flex-col items-center shadow-lg quick-link animate__animated animate__fadeInUp" style="--animate-duration:0.25s; --animate-delay:0s;">
+        <i class="fa-solid fa-map text-3xl mb-2"></i>
+        <span class="font-semibold">Mapa</span>
+      </a>
+      <a href="#" onclick="loadSection('tropas')" class="bg-blue-700 hover:bg-blue-800 transition rounded-xl p-4 flex flex-col items-center shadow-lg quick-link animate__animated animate__fadeInUp" style="--animate-duration:0.25s; --animate-delay:0.25s;">
+        <i class="fa-solid fa-shield-halved text-3xl mb-2"></i>
+        <span class="font-semibold">Tropas</span>
+      </a>
+      <a href="#" onclick="loadSection('edificios')" class="bg-pink-700 hover:bg-pink-800 transition rounded-xl p-4 flex flex-col items-center shadow-lg quick-link animate__animated animate__fadeInUp" style="--animate-duration:0.25s; --animate-delay:0.5s;">
+        <i class="fa-solid fa-building text-3xl mb-2"></i>
+        <span class="font-semibold">Edificios</span>
+      </a>
+      <a href="#" onclick="loadSection('tienda')" class="bg-yellow-700 hover:bg-yellow-800 transition rounded-xl p-4 flex flex-col items-center shadow-lg quick-link animate__animated animate__fadeInUp" style="--animate-duration:0.25s; --animate-delay:0.75s;">
+        <i class="fa-solid fa-store text-3xl mb-2"></i>
+        <span class="font-semibold">Tienda</span>
+      </a>
+    </div>
+    <div id="admin-btn-container"></div>
+  </div>
+  <script>
+    // Cargar datos de usuario y estadísticas
+    async function cargarDashboard() {
+      try {
+        // Oro (coins)
+        const usuario = await fetch('/api/usuario').then(r => r.json());
+        document.getElementById('gold-count').textContent = usuario.coins ?? '0';
+        // Tropas
+        const tropas = await fetch('/api/tropas').then(r => r.json());
+        let totalTropas = 0;
+        if (Array.isArray(tropas)) {
+          totalTropas = tropas.reduce((acc, t) => acc + (Number(t.quantity) || 0), 0);
+        }
+        document.getElementById('tropas-count').textContent = totalTropas;
+      } catch (e) {
+        document.getElementById('gold-count').textContent = '0';
+        document.getElementById('tropas-count').textContent = '0';
+      }
+    }
+    // Cargar datos de usuario y estadísticas
+    async function cargarActividad() {
+      let actividad = [];
+      try {
+        const response = await fetch('/api/actividad');
+        if (!response.ok) throw new Error('No autenticado');
+        actividad = await response.json();
+      } catch (e) {
+        actividad = [];
+      }
+      const lista = document.getElementById('actividad-list');
+      lista.innerHTML = '';
+      if (Array.isArray(actividad) && actividad.length > 0) {
+        actividad.slice(0, 3).forEach(act => {
+          let color = '', tipo = '', texto = '';
+          const cantidad = Number(act.cantidad);
+          if (act.tipo === 'oro') {
+            color = 'text-yellow-400';
+            tipo = 'oro';
+          } else if (act.tipo === 'tropas') {
+            color = 'text-blue-400';
+            tipo = 'tropas';
+          } else if (act.tipo === 'edificio') {
+            color = 'text-pink-400';
+            tipo = 'edificios';
+          } else {
+            color = 'text-gray-300';
+            tipo = act.tipo;
+          }
+          texto = `<span>${act.descripcion}</span> <span class='${color} font-bold ml-1'>${cantidad} de ${tipo}</span>`;
+          lista.innerHTML += `<li class="animate__animated animate__fadeInUp flex items-center gap-2">${texto}</li>`;
+        });
+      } else {
+        lista.innerHTML = '<li class="text-gray-400">Sin actividad reciente.</li>';
+      }
+    }
+    // Noticias funcional
+    async function cargarNoticias() {
+      const noticias = await fetch('/api/noticias').then(r => r.json()).catch(() => []);
+      const lista = document.getElementById('noticias-list');
+      const badge = document.getElementById('news-count');
+      lista.innerHTML = '';
+      if (noticias.length === 0) {
+        lista.innerHTML = '<li class="text-gray-400">No hay noticias recientes.</li>';
+        badge.textContent = 0;
+        return;
+      }
+      badge.textContent = noticias.length;
+      noticias.slice(0, 4).forEach(noticia => {
+        if (!noticia.id || !noticia.titulo || !noticia.resumen || !noticia.fecha) return;
+        const li = document.createElement('li');
+        li.innerHTML = `<b>${noticia.titulo}</b> <span class="text-gray-400 text-xs">${new Date(noticia.fecha).toLocaleDateString()}</span><br>${noticia.resumen}`;
+        li.className = 'animate__animated animate__fadeInUp cursor-pointer hover:bg-gray-700 p-2 rounded';
+        li.setAttribute('data-id', noticia.id);
+        li.onclick = () => {
+          window.selectedNoticiaId = noticia.id;
+          loadSection('noticias');
+        };
+        lista.appendChild(li);
+      });
+    }
+    // Botón de admin si el usuario es admin
+    async function mostrarBotonAdmin() {
+      const usuario = await fetch('/api/usuario').then(r => r.json());
+      if (usuario.is_admin) {
+        const cont = document.getElementById('admin-btn-container');
+        cont.innerHTML = `<button onclick="window.location.href='/admin'" class="mt-8 w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 animate__animated animate__fadeInUp"><i class='fa-solid fa-crown'></i> Panel de Administración</button>`;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarDashboard();
+      cargarNoticias();
+      cargarActividad();
+      mostrarBotonAdmin();
+    });
+  </script>
+</body>
+</html>

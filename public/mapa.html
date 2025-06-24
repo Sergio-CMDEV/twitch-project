@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mapa Interactivo - Reinos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         svg { width: 80%; height: auto; border: 2px solid #333; display: block; margin: 0 auto; }
         .region { cursor: pointer; stroke: #000; stroke-width: 2; }
@@ -17,28 +18,33 @@
         }
     </style>
 </head>
-<body>
-    <h1 style="text-align: center;">Mapa Interactivo - Reinos</h1>
-
-    <!-- SVG embebido directamente con coordenadas estimadas -->
-    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <path id="Salazar" class="region" d="M200,20 L380,60 L350,180 L250,170 Z" fill="#6aa84f" />
-        <path id="Arkangel" class="region" d="M50,80 L190,30 L240,160 L100,200 Z" fill="#f44336" />
-        <path id="Albion" class="region" d="M30,220 L180,220 L180,370 L30,370 Z" fill="#ff9800" />
-        <path id="Helenia" class="region" d="M220,230 L370,230 L370,370 L220,370 Z" fill="#9c27b0" />
-    </svg>
-
-    <div class="tooltip" id="tooltip"></div>
-
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="max-w-3xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-center mb-6">Mapa Interactivo - Reinos</h1>
+        <p class="text-center mb-4">Haz clic en una región para ver información y seleccionarla.</p>
+        <div class="relative">
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <path id="Salazar" class="region" d="M200,20 L380,60 L350,180 L250,170 Z" fill="#6aa84f" />
+                <path id="Arkangel" class="region" d="M50,80 L190,30 L240,160 L100,200 Z" fill="#f44336" />
+                <path id="Albion" class="region" d="M30,220 L180,220 L180,370 L30,370 Z" fill="#ff9800" />
+                <path id="Helenia" class="region" d="M220,230 L370,230 L370,370 L220,370 Z" fill="#9c27b0" />
+            </svg>
+            <div class="tooltip text-black" id="tooltip"></div>
+        </div>
+        <div id="region-info" class="mt-8 p-4 bg-gray-800 rounded shadow hidden"></div>
+        <div class="mt-8 text-center">
+            <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Volver al Dashboard</a>
+        </div>
+    </div>
     <script>
         const tooltip = document.getElementById('tooltip');
+        const infoBox = document.getElementById('region-info');
         const reinos = {
-            Arkangel: { nombre: 'Arkangel', tropas: 120 },
-            Salazar: { nombre: 'Salazar', tropas: 95 },
-            Albion: { nombre: 'Albion', tropas: 110 },
-            Helenia: { nombre: 'Helenia', tropas: 80 }
+            Arkangel: { nombre: 'Arkangel', tropas: 120, descripcion: 'Reino de los valientes y estrategas.' },
+            Salazar: { nombre: 'Salazar', tropas: 95, descripcion: 'Famoso por su magia y sabiduría.' },
+            Albion: { nombre: 'Albion', tropas: 110, descripcion: 'Tierra de caballeros y grandes llanuras.' },
+            Helenia: { nombre: 'Helenia', tropas: 80, descripcion: 'Conocida por sus arqueros y bosques.' }
         };
-
         document.querySelectorAll('.region').forEach(region => {
             region.addEventListener('mouseover', (e) => {
                 const info = reinos[e.target.id];
@@ -47,19 +53,17 @@
                 tooltip.style.left = e.pageX + 'px';
                 tooltip.style.top = e.pageY + 'px';
             });
-
             region.addEventListener('mousemove', (e) => {
                 tooltip.style.left = e.pageX + 'px';
                 tooltip.style.top = e.pageY + 'px';
             });
-
             region.addEventListener('mouseout', () => {
                 tooltip.style.display = 'none';
             });
-
             region.addEventListener('click', (e) => {
                 const info = reinos[e.target.id];
-                alert(`Has seleccionado: ${info.nombre}\nTropas: ${info.tropas}`);
+                infoBox.innerHTML = `<h2 class='text-2xl font-bold mb-2'>${info.nombre}</h2><p>${info.descripcion}</p><p class='mt-2'>Tropas: <span class='font-semibold'>${info.tropas}</span></p>`;
+                infoBox.classList.remove('hidden');
             });
         });
     </script>

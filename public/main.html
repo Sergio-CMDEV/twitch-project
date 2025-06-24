@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyKingdom Dashboard</title>
+  <title>DearBird Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .fade-enter {
@@ -13,9 +13,47 @@
     }
 
     .fade-enter-active {
-      transition: all 0.4s ease-in-out;
+      transition: all 0.2s ease-in-out;
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Sidebar sticky */
+    #sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      align-self: flex-start;
+      overflow: hidden;
+    }
+
+    /* Reduce márgenes del main content */
+    main.flex-1.p-6.space-y-6 {
+      padding: 1.5rem !important;
+      margin: 0 !important;
+    }
+
+    /* Notificación roja para el menú de chat */
+    .chat-live-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-left: 8px;
+      vertical-align: middle;
+      box-shadow: 0 0 6px 2px #ef4444cc;
+      animation: live-pulse 1.2s infinite alternate;
+    }
+
+    @keyframes live-pulse {
+      0% {
+        box-shadow: 0 0 6px 2px #ef4444cc;
+      }
+
+      100% {
+        box-shadow: 0 0 16px 6px #ef4444aa;
+      }
     }
   </style>
 </head>
@@ -23,23 +61,43 @@
 <body class="bg-gray-900 text-white">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-gray-800 p-5 flex flex-col space-y-6">
-      <h2 class="text-2xl font-bold">MyKingdom</h2>
-      <nav id="sidebar-menu" class="flex flex-col space-y-3">
+    <aside id="sidebar" class="w-64 bg-gray-800 p-5 flex flex-col h-screen" style="overflow:hidden;">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center min-w-0">
+          <img id="sidebar-profile-img" class="w-10 h-10 rounded-full border-2 border-blue-300 mr-2"
+            src="/img/default-profile.png" alt="avatar">
+          <h2 class="text-2xl font-bold truncate max-w-[110px]" style="max-width:110px;">DearBird</h2>
+        </div>
+        <button id="hide-sidebar-btn" onclick="toggleSidebar()"
+          class="ml-2 text-gray-400 hover:text-white focus:outline-none" title="Ocultar menú">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <nav id="sidebar-menu" class="flex-1 flex flex-col space-y-3 overflow-y-auto">
         <a href="#" onclick="loadSection('dashboard')" class="hover:bg-gray-700 p-2 rounded" id="menu-dashboard">Dashboard</a>
         <a href="#" onclick="loadSection('tropas')" class="hover:bg-gray-700 p-2 rounded" id="menu-tropas">Tropas</a>
-        <a href="#" onclick="loadSection('recursos')" class="hover:bg-gray-700 p-2 rounded" id="menu-recursos">Recursos</a>
         <a href="#" onclick="loadSection('edificios')" class="hover:bg-gray-700 p-2 rounded" id="menu-edificios">Edificios</a>
         <a href="#" onclick="loadSection('tienda')" class="hover:bg-gray-700 p-2 rounded" id="menu-tienda">Tienda</a>
-        <a href="#" onclick="loadSection('chat')" class="hover:bg-gray-700 p-2 rounded" id="menu-chat">Chat</a>
+        <a href="#" onclick="loadSection('chat')" class="hover:bg-gray-700 p-2 rounded" id="menu-chat">Chat
+          <span id="chat-live-indicator" class="chat-live-indicator hidden"></span>
+        </a>
         <a href="#" onclick="loadSection('noticias')" class="hover:bg-gray-700 p-2 rounded" id="menu-noticias">Noticias</a>
         <a href="#" onclick="loadSection('estadisticas')" class="hover:bg-gray-700 p-2 rounded" id="menu-estadisticas">Estadísticas</a>
-        <!-- <a href="#" onclick="loadSection('nueva')" class="hover:bg-gray-700 p-2 rounded" id="menu-nueva">Nueva Sección</a> -->
-
-        <button id="lang-btn" onclick="toggleLanguage()" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded">Cambiar Idioma</button>
+        <button id="lang-btn" onclick="toggleLanguage()" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded">Cambiar
+          Idioma</button>
         <a id="logout-btn" href="#" onclick="logout()" class="hover:bg-red-600 bg-red-700 p-2 rounded mt-auto">Cerrar sesión</a>
       </nav>
     </aside>
+    <!-- Botón para mostrar el menú -->
+    <button id="show-sidebar-btn" onclick="toggleSidebar()"
+      class="fixed top-4 left-4 z-50 bg-gray-800 text-white p-2 rounded shadow-lg hidden"
+      title="Mostrar menú">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
 
     <!-- Main Content -->
     <main class="flex-1 p-6 space-y-6">
@@ -56,7 +114,6 @@
       es: {
         dashboard: 'Tablero',
         tropas: 'Tropas',
-        recursos: 'Recursos',
         edificios: 'Edificios',
         tienda: 'Tienda',
         chat: 'Chat',
@@ -64,12 +121,10 @@
         estadisticas: 'Estadísticas',
         logout: 'Cerrar sesión',
         changeLang: 'Cambiar Idioma'
-        //nueva: 'Nueva Sección',
       },
       en: {
         dashboard: 'Dashboard',
         tropas: 'Troops',
-        recursos: 'Resources',
         edificios: 'Buildings',
         tienda: 'Shop',
         chat: 'Chat',
@@ -77,15 +132,23 @@
         estadisticas: 'Statistics',
         logout: 'Log out',
         changeLang: 'Change Language'
-        //nueva: 'New Section',
       }
     };
 
+    async function obtenerDatosUsuario() {
+      try {
+        const res = await fetch('/api/usuario');
+        const data = await res.json();
+        return data;
+      } catch (err) {
+        console.error("Error al obtener datos del usuario:", err);
+        return null;
+      }
+    }
     function updateSidebarText() {
       const t = translations[currentLang];
       document.getElementById('menu-dashboard').textContent = t.dashboard;
       document.getElementById('menu-tropas').textContent = t.tropas;
-      document.getElementById('menu-recursos').textContent = t.recursos;
       document.getElementById('menu-edificios').textContent = t.edificios;
       document.getElementById('menu-tienda').textContent = t.tienda;
       document.getElementById('menu-chat').textContent = t.chat;
@@ -98,18 +161,22 @@
     function toggleLanguage() {
       currentLang = currentLang === 'es' ? 'en' : 'es';
       updateSidebarText();
-      loadSection('dashboard');
+      // Notificar a la sección cargada del cambio de idioma
+      const event = new CustomEvent('setLang', { detail: currentLang });
+      window.dispatchEvent(event);
     }
 
     function animateTransition(element) {
-      element.classList.remove('fade-enter');
+      element.classList.remove('fade-enter', 'fade-enter-active');
       void element.offsetWidth;
       element.classList.add('fade-enter');
-      element.classList.add('fade-enter-active');
+      setTimeout(() => {
+        element.classList.add('fade-enter-active');
+      }, 10);
       setTimeout(() => {
         element.classList.remove('fade-enter');
         element.classList.remove('fade-enter-active');
-      }, 400);
+      }, 210);
     }
 
     function logout() {
@@ -118,68 +185,166 @@
 
     function crearTarjetaTropa(nombre, cantidad) {
       return `
-        <div class="bg-gray-800 p-5 rounded-lg shadow flex flex-col justify-between space-y-4 transition duration-300 hover:scale-105">
+        <div class="bg-gray-800 p-5 rounded-lg shadow flex flex-col justify-between space-y-4 transition duration-150 hover:scale-105">
           <div>
             <h2 class="text-xl font-bold">${nombre}</h2>
             <p class="text-gray-400">Cantidad: <span class="font-semibold">${cantidad}</span></p>
           </div>
           <div class="flex gap-2">
-            <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full transition">Reclutar</button>
-            <button class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded w-full transition">Mejorar</button>
+            <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full transition duration-150">Reclutar</button>
+            <button class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded w-full transition duration-150">Mejorar</button>
           </div>
         </div>
       `;
     }
 
-    function loadSection(section) {
+    function loadSection(section = 'dashboard') {
+      localStorage.setItem('currentSection', section);
       const content = document.getElementById('main-content');
       animateTransition(content);
-      let html = '';
-      const t = translations[currentLang];
-
-      switch (section) {
-        case 'dashboard':
-          html = `<h1 class="text-3xl font-semibold mb-6">${t.dashboard}</h1><p>${currentLang === 'es' ? 'Bienvenido al tablero principal.' : 'Welcome to your main dashboard.'}</p>`;
-          break;
-
-        case 'tropas':
-          console.log("Sección tropas cargando...");
-          const tropas = currentLang === 'es'
-            ? [['Arqueros', 30], ['Espadachines', 20], ['Magos', 10]]
-            : [['Archers', 30], ['Swordsmen', 20], ['Mages', 10]];
-          html = `
-            <h1 class="text-3xl font-semibold mb-6">${t.tropas}</h1>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              ${tropas.map(t => crearTarjetaTropa(t[0], t[1])).join('')}
-            </div>
-          `;
-          break;
-
-        case 'recursos':
-        case 'edificios':
-        case 'tienda':
-        case 'chat':
-        case 'noticias':
-        case 'estadisticas':
-          html = `<h1 class="text-3xl font-semibold mb-6">${t[section]}</h1><p>${t[section]} ${currentLang === 'es' ? 'en desarrollo...' : 'under development...'}</p>`;
-          break;
-        /* case 'nueva':
-            html = `
-                <h1 class="text-3xl font-semibold mb-6">${t.nueva}</h1>
-                <p>${currentLang === 'es' ? 'Contenido de la nueva sección.' : 'Content of the new section.'}</p>
-            `;
-            break; */
-        default:
-          html = `<p>Sección no encontrada.</p>`;
-      }
-
-      content.innerHTML = html;
+      fetch(`/sections/${section}.html`)
+        .then(res => {
+          if (!res.ok) throw new Error('No se pudo cargar la sección');
+          return res.text();
+        })
+        .then(html => {
+          content.innerHTML = html;
+          // Ejecutar scripts embebidos manualmente (siempre, incluso si ya existen)
+          const scripts = content.querySelectorAll('script');
+          scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+              newScript.src = oldScript.src;
+            } else {
+              newScript.textContent = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+            oldScript.remove();
+          });
+          // Si es la sección de tropas, ejecuta las funciones de renderizado
+          if (section === 'tropas') {
+            if (typeof renderTropas === 'function') renderTropas();
+            if (typeof renderDetails === 'function') renderDetails(null);
+          }
+          // Si es la sección de noticias, fuerza la carga de noticias
+          if (section === 'noticias') {
+            if (typeof setLangNoticias === 'function') setLangNoticias(currentLang);
+          }
+          // Si es la sección de dashboard, fuerza la carga de actividad y noticias
+          if (section === 'dashboard') {
+            if (typeof cargarActividad === 'function') cargarActividad();
+            if (typeof cargarNoticias === 'function') cargarNoticias();
+            if (typeof mostrarBotonAdmin === 'function') mostrarBotonAdmin();
+            if (typeof cargarDashboard === 'function') cargarDashboard();
+          }
+          // Si es la sección de actividad, fuerza la carga de actividad
+          if (section === 'actividad') {
+            if (typeof cargarActividad === 'function') cargarActividad();
+          }
+        })
+        .catch(err => {
+          content.innerHTML = `<div class='text-red-500'>${err.message}</div>`;
+        });
     }
 
-    window.onload = () => {
+    // Al cargar la página, restaura la sección guardada SOLO si no está ya cargada
+    document.addEventListener('DOMContentLoaded', () => {
+      setSidebarUserName();
       updateSidebarText();
+      checkTwitchLive();
+      const lastSection = localStorage.getItem('currentSection') || 'dashboard';
+      if (!window._sectionLoaded) {
+        window._sectionLoaded = true;
+        loadSection(lastSection);
+      }
+    });
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const showBtn = document.getElementById('show-sidebar-btn');
+      if (sidebar.classList.contains('hidden')) {
+        sidebar.classList.remove('hidden');
+        showBtn.classList.add('hidden');
+      } else {
+        sidebar.classList.add('hidden');
+        showBtn.classList.remove('hidden');
+      }
+    }
+
+    async function setSidebarUserName() {
+      const user = await obtenerDatosUsuario();
+      const sidebarTitle = document.querySelector('#sidebar h2');
+      let sidebarProfileImg = document.getElementById('sidebar-profile-img');
+      // Usar imagen de perfil de Twitch o fallback
+      if (user && user.profile_image_url) {
+        sidebarProfileImg.src = user.profile_image_url;
+        sidebarProfileImg.onerror = function() {
+          sidebarProfileImg.src = '/img/default-profile.png';
+        };
+        sidebarProfileImg.style.display = '';
+      } else {
+        sidebarProfileImg.src = '/img/default-profile.png';
+        sidebarProfileImg.style.display = '';
+      }
+      // Limita el nombre y añade puntos suspensivos si es largo
+      if (user && user.twitch) {
+        let nombre = user.twitch;
+        if (nombre.length > 10) {
+          nombre = nombre.slice(0, 7) + '...';
+        }
+        sidebarTitle.textContent = nombre;
+      } else {
+        sidebarTitle.textContent = 'DearBird';
+      }
+    }
+
+    async function checkTwitchLive() {
+      try {
+        const res = await fetch('https://api.twitch.tv/helix/streams?user_login=DearBird', {
+          headers: {
+            'Client-ID': 'YOUR_TWITCH_CLIENT_ID',
+            'Authorization': 'Bearer YOUR_TWITCH_OAUTH_TOKEN'
+          }
+        });
+        const data = await res.json();
+        const isLive = data.data && data.data.length > 0;
+        const chatMenu = document.getElementById('menu-chat');
+        let indicator = document.getElementById('chat-live-indicator');
+        if (isLive) {
+          if (!indicator) {
+            indicator = document.createElement('span');
+            indicator.id = 'chat-live-indicator';
+            indicator.className = 'chat-live-indicator';
+            chatMenu.appendChild(indicator);
+          }
+        } else if (indicator) {
+          indicator.remove();
+        }
+      } catch (e) { /* Silenciar error */ }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setSidebarUserName();
+      updateSidebarText();
+      checkTwitchLive();
+      setInterval(checkTwitchLive, 60000); // Actualiza cada minuto
+    });
+
+    window.onload = () => {
       loadSection('dashboard');
     };
+
+    // async function mostrarBotonAdminSidebar() {
+    //   const usuario = await fetch('/api/usuario').then(r => r.json());
+    //   if (usuario.is_admin) {
+    //     const sidebar = document.getElementById('sidebar-menu');
+    //     const adminBtn = document.createElement('a');
+    //     adminBtn.href = '/admin';
+    //     adminBtn.className = 'bg-purple-700 hover:bg-purple-800 text-white p-2 rounded font-bold flex items-center gap-2 mt-2';
+    //     adminBtn.innerHTML = "<i class='fa-solid fa-crown'></i> Panel Admin";
+    //     sidebar.insertBefore(adminBtn, document.getElementById('logout-btn'));
+    //   }
+    // }
   </script>
 </body>
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tienda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
+  <div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3 animate__animated animate__fadeInDown">
+      <i class="fa-solid fa-store text-yellow-400 animate__animated animate__pulse animate__infinite"></i> <span id="tienda-title">Tienda</span>
+    </h1>
+    <div id="tienda-content" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+  </div>
+  <script>
+    const tiendaText = {
+      es: { title: 'Tienda', empty: 'No hay productos disponibles.', buy: 'Comprar' },
+      en: { title: 'Shop', empty: 'No products available.', buy: 'Buy' }
+    };
+    function setLangTienda(lang) {
+      document.getElementById('tienda-title').textContent = tiendaText[lang].title;
+      cargarTienda(lang);
+    }
+    async function cargarTienda(lang = 'es') {
+      const productos = await fetch('/api/tienda').then(r => r.json()).catch(() => []);
+      const cont = document.getElementById('tienda-content');
+      cont.innerHTML = '';
+      if (!productos.length) {
+        cont.innerHTML = `<div class='text-gray-400'>${tiendaText[lang].empty}</div>`;
+        return;
+      }
+      productos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col items-center animate__animated animate__fadeInUp';
+        div.innerHTML = `<div class='text-3xl mb-2'><i class='fa-solid fa-gem text-yellow-400'></i></div><div class='font-bold text-lg mb-1'>${p.nombre}</div><div class='text-gray-400 mb-2'>${p.descripcion}</div><div class='font-bold text-green-400 mb-3'>${p.precio} <i class='fa-solid fa-coins'></i></div><button class='bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded transition font-semibold'>${tiendaText[lang].buy}</button>`;
+        cont.appendChild(div);
+      });
+    }
+    window.addEventListener('setLang', e => setLangTienda(e.detail));
+    document.addEventListener('DOMContentLoaded', () => setLangTienda('es'));
+  </script>
+</body>
+</html>
